@@ -1,0 +1,262 @@
+{% extends "Index.html" %}
+
+{% block title %}Add Evidence{% endblock %}
+
+
+{% block content %}  
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+</style>
+<br>
+<div class="row" style="height: 90vh; overflow-y: scroll">
+     <div class="col-11">
+          <div class="row">
+               <br>
+               <div class="col">
+                    <h1 style="font-weight: bold; font-size: large;">Case Management <i class="bi bi-caret-right-fill"></i>{{case.case_no}}<i class="bi bi-caret-right-fill"></i> Add Evidence</h1>
+               </div>
+          </div>
+          <br>
+          <div class="row">
+               <div style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                    <form method="post" id="evidenceForm">
+                         {% csrf_token %}
+                         <input type='hidden' id='filename' name='filename' value=''>
+                         <div class="row" style="height: 90%; width: 100%;">
+                              <div id="addEvidencePage">
+                                   <br>
+                                   <div class="row mx-1">
+                                        <h3>Add Evidence</h3>
+                                        <hr style="border-top: thin solid black; opacity: 0.1;">
+                                   </div>
+                                   <div class="row">
+                                        <div class="form-group row">
+                                             <label class="col-3 col-form-label">Evidence No</label>
+                                             <div class="col-5">
+                                                  <input type="text" id="evidenceno" name="evidenceno" class="form-control" value="{{next_evidence_no}}" disabled>
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <br>
+                                   <div class="row">
+                                        <div class="col-sm-6">
+                                             <div class="form-group">
+                                                  <label class="label-title">Title</label>
+                                                  <input type="text" id="title" name="title" class="form-control" placeholder="" maxlength="100" required>
+                                             </div>
+                                             <div class="form-group">
+                                                  <label class="label-title">Collection date and time</label>
+                                                  <input type="datetime-local" id="collection_datetime" name="collection_datetime" class="form-control" placeholder="" required>
+                                             </div>
+                                             <div class="form-group">
+                                                  <label class="label-title">Collection method</label>
+                                                  <!-- Call back end for dropdown -->
+                                                  <input type="text" id="collection_method" name="collection_method" class="form-control" placeholder="" max-length="300" required>
+                                             </div>
+                                             <div class="form-group">
+                                                  <label class="label-title">Collection location</label>
+                                                  <input type="text" id="collection_location" name="collection_location" class="form-control" placeholder="" maxlength="500" required>
+                                             </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                             <div class="form-group">
+                                                  <label class="label-title">Type of evidence </label>
+                                                  <select name="evidence_type" id="evidence_type" class="form-select" style="font-size:12px" required>
+                                                       <option selected disabled hidden value="">--- Select Evidence ---</option>
+                                                       <option value="Biological">Biological</option>
+                                                       <option value="Trace">Trace</option>
+                                                       <option value="Digital">Digital</option>
+                                                       <option value="Physical">Physical</option>
+                                                       <option value="Testimonial">Testimonial</option>
+                                                       <option value="Chemical">Chemical</option>
+                                                       <option value="Pattern">Pattern</option>
+                                                  </select>
+                                             </div>
+                                             <div class="form-group">
+                                                  <label class="label-title">Created date </label>
+                                                  <!-- not allow to add -->
+                                                  <input type="text" id="createdDateDisabled" name="createdDateDisabled" class="form-control" placeholder="" value="{{created_date}}" disabled>
+                                             </div>
+                                             <div class="form-group">
+                                                  <label class="label-title">Evidence Status</label>
+                                                  <input type="text" id="status" name="status" class="form-control" value="{{status}}" placeholder="" disabled>
+                                             </div>
+                                             <div class="form-group">
+                                                  <label class="label-title">Priority to analysis</label>
+                                                  <select name="priority" id="priority" class="form-select" style="font-size:12px" required>
+                                                       <option selected disabled hidden value="">--- Select Priority ---</option>
+                                                       <option value="Low">Low</option>
+                                                       <option value="Medium">Medium</option>
+                                                       <option value="High">High</option>
+                                                  </select>
+                                             </div>
+                                             
+                                        </div>
+                                   </div>
+                                   <div class="row">
+                                        <div class="form-group">
+                                             <label class="label-title">Description</label>
+                                             <textarea id="description" name="description" class="form-control" rows="4" max-length="5000" required></textarea>
+                                        </div>
+                                   </div>
+                                   <br>
+                              </div>
+                         </div>
+                    </form>
+                    <div class="row">
+                         <div class="form-group">
+                              <label class="label-title">Image</label>
+                              <form method="post" enctype="multipart/form-data" class="dropzone needsclick form-control" id="evidenceImage">
+                                   {% csrf_token %}
+                                   <div class="dz-message needsclick">
+                                        <i class="bi bi-cloud-upload" style="font-size: large;"></i>
+                                        <h6>Drop files here or click to upload.</h6>
+                                   </div>
+                              </form>
+                         </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                         <div class="col-4"></div>
+                         <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                              <a class="btn btn-danger" href="{% url 'fcmsapp:case-details' case_no=case.case_no %}" style="
+                              background-color:#555555;
+                              color:#ffffff;
+                              border: none; 
+                              border-radius: 10px; 
+                              font-size: medium;
+                              display: block;
+                              width: 100%;">
+                              Cancel
+                              </a>
+                         </div>
+                         <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                              <button type="submit" id="submitBtn" class="" type="button" onclick="" style="
+                              background-color:#555555;
+                              color:#ffffff;
+                              border: none; 
+                              border-radius: 10px;
+                              font-size: medium;
+                              display: block;
+                              width: 100%;
+                              height: 100%;">
+                              Save
+                              </button>
+                         </div>
+                    </div>
+                    <br>
+               </div>
+          </div>
+     </div>
+</div>
+<script>
+     const collection_datetime = document.getElementById('collection_datetime');
+     collection_datetime.addEventListener('input',function(){
+          var date = new Date(collection_datetime.value);
+          var dateNow = Date.now();
+          if(date > dateNow){
+               collection_datetime.setCustomValidity("Collection date and time cannot be in the future");
+               
+          }else{
+               collection_datetime.setCustomValidity("");
+          }
+     });
+     
+     document.getElementById("title").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("collection_method").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("collection_location").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("description").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     
+     Dropzone.autoDiscover = false;
+     var evidenceImage = new Dropzone("#evidenceImage", {
+          url: "{% url 'fcmsapp:upload-evidence-image' %}",
+          method: 'post',
+          paramName: "evidenceImage",
+          maxFilesize: 5,
+          maxFiles: 1,
+          acceptedFiles: ".jpeg,.jpg,.png,.gif",
+          addRemoveLinks: true,
+          uploadMultiple: false,
+          parallelUploads: 1,
+          init: function() {
+               this.on("maxfilesexceeded", function(file) {
+                    this.removeAllFiles();
+                    this.addFile(file);
+               });
+               this.on("addedfile", function(file) {
+                    if (this.files.length > 1) {
+                         this.removeFile(this.files[0]);
+                    }
+               });
+               this.on("removedfile", function(file) {
+                    $.ajax({ // request to remove image from temp (pass to views.py)
+                         type: 'POST',
+                         url: "{% url 'fcmsapp:remove-evidence-image' %}",
+                         data: {
+                              csrfmiddlewaretoken: "{{ csrf_token }}",
+                              filename: file.name
+                         },
+                         success: function(response) {
+                              toastr.success("Image removed successfully");
+                         },
+                         error: function(response) {
+                              toastr.error("Error removing image");
+                         }
+                    });
+
+                    if (this.files.length === 0) {
+                         this.emit("reset");
+                    }
+               });
+               this.on('success', function(file, response) {
+                    document.getElementById('filename').value = response.filename;
+               })
+          },
+     });
+     
+     document.getElementById("submitBtn").addEventListener("click", function(event) {
+          if (evidenceImage.getAcceptedFiles().length == 0) {
+               toastr.error("Please upload an image");
+               event.preventDefault();
+               return false;
+          }
+
+          if (document.getElementById("evidenceForm").reportValidity()){
+               document.getElementById("evidenceForm").submit();
+          }
+     });
+</script>
+{% endblock %}

@@ -1,0 +1,326 @@
+{% extends "Index.html" %}
+
+{% block title %}Register Staff{% endblock %}
+
+
+{% block content %}
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+     .save-button{
+          color:#ffffff;
+          background-color: #87ceeb;
+          border: none; 
+          border-radius: 10px;
+          font-size: large;
+          display: block;
+          width: 100%;
+          height: 100%;
+     }
+     .save-button:hover{
+          background-color: #6facc5 ;
+     }
+     div .dz-preview{
+          background-color: transparent !important;
+     }
+     div .dz-preview .dz-image{
+          width: 150px !important;
+          height: 150px !important;
+          border-radius: 50% !important;
+          object-fit: contain !important;
+     }
+     div .dz-preview .dz-image img{
+          width: 150px !important;
+          height: 150px !important;
+          border-radius: 50% !important;
+          object-fit: contain !important;
+     }
+</style>
+<br>
+<div class="row" style="height: 95vh; overflow-y: scroll;">
+     <div class="col-12">
+          <div class="row">
+               <br>
+               <div class="col">
+                    <h1 style="font-weight: bold; font-size: large;">Staff Management <i class="bi bi-caret-right-fill"></i> Register New Staff</h1>
+               </div>
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div id="registerStaffPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                    <br>
+                    <div class="row mx-1">
+                         <h3>Personal Information</h3>
+                         <hr style="border-top: thin solid black; opacity: 0.1;">
+                    </div>
+                    <div class="row">
+                         <div class="col-4"></div>
+                         <div class="col-4" style="display: flex; align-items: center; justify-content: center;">
+                              <form method="post" enctype="multipart/form-data" class="dropzone needsclick form-control " id="profilePic" style="border-radius:50%; width:150px; height:150px;display: flex; align-items: center; justify-content: center;">
+                                   {% csrf_token %}
+                                   <label class="dz-message" style="font-size:90px; opacity:0.1;">
+                                        <i class="bi bi-person-fill"></i>
+                                   </label>
+                              </form>
+                         </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                         <div class="col-4">
+                         </div>
+                         <div class="col-4">
+                              <a id="removeProfilePic" href="#" class="mx-1" style="font-size:12px; justify-content:center; align-items:center; display:flex; color: red; text-decoration: underline;">
+                                   Remove Profile Picture
+                              </a>
+                         </div>
+                    </div>
+                    <br>
+                    <form method="post" id="staffForm">
+                         {% csrf_token %}
+                         <input type='hidden' id='filename' name='filename'>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Name</label>
+                                        <input type="text" id="name" name="name" class="form-control" placeholder="" oninput="populateReadonly();" maxlength="50" required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Gender</label>
+                                        <select class="form-select" style="font-size:12px" id="gender" name="gender" required>
+                                             <option selected disabled hidden value="">--- Select Gender ---</option>
+                                             <option value="Male">Male</option>
+                                             <option value="Female">Female</option>
+                                        </select>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Date of Birth</label>
+                                        <input type="date" id="dob" name="dob" class="form-control" placeholder="" onchange="populateReadonly()" required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Phone Number (without '-')</label>
+                                        <input type="tel" class="form-control" id="phonenumber" name="phonenumber" pattern="01[0-9]{1}[0-9]{7,8}" required>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Role</label>
+                                        <select class="form-select" style="font-size:12px" id="role" name="role" required>
+                                             <option selected disabled hidden value="">--- Select Role ---</option>
+                                             <option value="Forensic Investigator">Forensic Investigator</option>
+                                             <option value="Chemist">Chemist</option>
+                                             <option value="Pathologist">Pathologist</option>
+                                        </select>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Created Date</label>
+                                        <!-- Not allow to edit -->
+                                        <input type="text" id="created_datetime" name="created_datetime" class="form-control" value="{{created_datetime}}" disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Email</label>
+                                        <!-- created itself -->
+                                        <input type="text" id="emailDisabled" name="emailDisabled" class="form-control" value="{{next_staff_email}}" disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Password</label>
+                                        <input type="text" id="passwordDisabled" name="passwordDisabled" class="form-control" disabled>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row my-3">
+                              <div class="col-4"></div>
+                              <input type="hidden" id="email" name="email">
+                              <input type="hidden" id="password" name="password">
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:staff-management' %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px; 
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Cancel
+                                   </a>
+                              </div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <button type="submit" class="" id="submitBtn" type="button" onclick="populateHidden();" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;
+                                   height: 100%;">
+                                   Save
+                                   </button>
+                              </div>
+                         </div>
+                    </form>
+               </div>
+          </div>
+     </div>
+</div>
+<script>
+     // auto generate password according name and dob
+     function populateReadonly(){
+          const password = document.getElementById('passwordDisabled');
+          const name = document.getElementById('name');
+          const dob = document.getElementById('dob');
+
+          if (name.value != "" && dob.value != ""){
+               const name_split = name.value.split(" ");
+               let initials = "";
+               
+               for (let i = 0; i < name_split.length; i++) {
+                    if (name_split[i].length > 0) {
+                         initials += name_split[i][0];
+                    }
+               }
+
+               var new_password = initials[0] + initials.slice(1).toLowerCase() + dob.value.replaceAll("-", "");
+               
+               password.value = new_password;
+          }
+     }
+
+     // email and password are not allowed to modify , all are auto generated
+     function populateHidden(){
+          const emailDisabled = document.getElementById('emailDisabled');
+          const passwordDisabled = document.getElementById('passwordDisabled');
+          var email = document.getElementById('email');
+          var password = document.getElementById('password');
+
+          email.value = emailDisabled.value;
+          password.value = passwordDisabled.value;
+     }
+
+     // name must not contain numbers and special characters
+     const name = document.getElementById('name');
+     const phonenumber = document.getElementById('phonenumber');
+     const dob = document.getElementById('dob');
+
+     name.addEventListener('input', function(){
+          var nameInput = name.value;
+          if (/[0-9]/.test(nameInput)) {
+               name.setCustomValidity('Name must not contain numbers');
+          } else if (/[^A-Za-z0-9 ./]/.test(nameInput)){
+               name.setCustomValidity('Name must not contain special characters other than dots and slashes.');
+          } else if (nameInput.trim() == "" || nameInput.trim() == null || nameInput.trim() == undefined){
+               name.setCustomValidity('Name must not be empty');  
+          } else if (/^[.\/]*$/.test(nameInput)) {
+               name.setCustomValidity('Name must not contain only dots and slashes.')
+          } else {
+               name.setCustomValidity('');
+          }
+     });
+
+     phonenumber.addEventListener('input', function(){
+          var phonenumberInput = phonenumber.value;
+          if (/[A-Za-z]/.test(phonenumberInput)) {
+               phonenumber.setCustomValidity('Phone number must not contain alphabets');
+          } else if (/[^A-Za-z0-9]/.test(phonenumberInput)){
+               phonenumber.setCustomValidity('Phone number must not contain special characters');
+          } else if (phonenumberInput.trim() == "" || phonenumberInput.trim() == null || phonenumberInput.trim() == undefined){
+               phonenumber.setCustomValidity('Phone number must not be empty');  
+          } else if (phonenumberInput.length < 10 || phonenumberInput.length > 12){
+               phonenumber.setCustomValidity('Phone number must be 10- 12 digits');
+          }else {
+               phonenumber.setCustomValidity('');
+          }
+     }); 
+
+     dob.addEventListener('input', function(){
+          var dobInput = new Date(dob.value);
+          var today = Date.now();
+          var age = Math.abs(new Date(today - dobInput).getUTCFullYear() - 1970);
+          
+          if (dobInput > today ) {
+               dob.setCustomValidity('Date of birth must not be in the future');
+
+          }else if(age < 21 || age > 100){
+               dob.setCustomValidity('Age must be 21-100 years old');
+          }
+           else {
+               dob.setCustomValidity('');
+          }
+     });
+
+     Dropzone.autoDiscover = false;
+     var profilePic = new Dropzone("#profilePic", {
+          url: "{% url 'fcmsapp:upload-profile-pic' %}", // Set the url for your upload script location
+          paramName: "profilePic",
+          method: "post",
+          maxFiles: 1,
+          maxFilesize: 5,
+          acceptedFiles: ".jpeg,.jpg,.png,.gif",
+          addRemoveLinks: false,
+          parallelUploads: 1,
+          init: function () {
+               this.on("maxfilesexceeded", function(file) {
+                    this.removeAllFiles();
+                    this.addFile(file);
+               });
+               this.on("addedfile", function(file) {
+                    if (this.files.length > 1) {
+                         this.removeFile(this.files[0]);
+                    }
+               });
+               this.on("removedfile", function(file) {
+                    $.ajax({ // request to remove image from temp (pass to views.py)
+                         type: 'POST',
+                         url: "{% url 'fcmsapp:remove-profile-pic' %}",
+                         data: {
+                              csrfmiddlewaretoken: "{{ csrf_token }}",
+                              filename: file.name
+                         },
+                         success: function(response) {
+                              toastr.success("Image removed successfully");
+                         },
+                         error: function(response) {
+                              toastr.error("Error removing image");
+                         }
+                    });
+
+                    if (this.files.length === 0) {
+                         this.emit("reset");
+                    }
+               });
+               this.on('success', function(file, response) {
+                    document.getElementById('filename').value = response.filename;
+               })
+
+               
+          },
+     });
+
+     document.getElementById("submitBtn").addEventListener("click", function(event) {
+          if (profilePic.getAcceptedFiles().length == 0) {
+               toastr.error("Please upload an image");
+               event.preventDefault();
+               return false;
+          }
+
+          if (document.getElementById("staffForm").reportValidity()){
+               document.getElementById("staffForm").submit();
+          }
+     });
+
+     document.getElementById('removeProfilePic').addEventListener('click', function(){
+          if (profilePic.files.length > 0){
+               profilePic.removeAllFiles();
+          } else {
+               toastr.error('No image to remove!');
+          }
+     });
+
+     
+
+</script>
+{% endblock %}

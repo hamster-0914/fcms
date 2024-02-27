@@ -1,0 +1,326 @@
+{% extends "Index.html" %}
+
+{% block title %}Staff Management{% endblock %}
+
+
+{% block content %}
+<style>
+     .selected{
+          border-top: none;
+          border-left: none;
+          border-right: none;          
+          border-bottom: thick solid #87CEEB;
+     }
+     .not-selected{
+          border-top: none;
+          border-left: none;
+          border-right: none;
+          border-bottom: none;
+     }
+     .table{
+          height: fit-content;
+          border-collapse: separate;
+          border-spacing: 0 15px;
+          font-size: 14px;
+     }
+     .table > thead > tr > th{
+          text-align: center;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td,
+     .table-striped > tbody > tr:nth-child(2n+1) > th{
+          background-color: #87CEEB;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td:first-child{
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td:last-child{
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td{
+          border-top: thin solid lightgray;
+          border-bottom: thin solid lightgray;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td:first-child{
+          border: thin solid lightgray;
+          border-right: none;
+          border-radius: 10px;
+          -moz-border-radius:10px 0 0 10px;
+          -webkit-border-radius:10px 0 0 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td:last-child{
+          border: thin solid lightgray;
+          border-left: none;
+          border-radius: 10px;
+          -moz-border-radius:0 10px 10px 0;
+          -webkit-border-radius:0 10px 10px 0;
+     }
+     .page-nav{
+          display: inline-block;
+          text-align: center;
+     }
+     .page-nav button{
+          border: transparent;
+          color: black;
+          background-color: transparent;
+          width: 30px;
+          height: 30px;
+     }
+     .page-nav button:hover{
+          border-radius: 50%;
+          color: black;
+          background-color: #87CEEB;
+     }
+     input::-webkit-outer-spin-button,
+     input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+     }
+</style>
+<br>
+<div class="row">
+     <div class="col-11">
+          <div class="row">
+               <div class="col-4">
+                    <h1 style="font-weight: bold; font-size: x-large;">Staff Management</h1>
+               </div>
+               <div class="col-5"></div>
+               <div class="col-3">
+                    <a href="{% url 'fcmsapp:register-staff' %}" style="border: 1px solid #ffffff ;background-color: #87CEEB ; padding: 5% 10%; font-size: smaller;justify-content: center;align-items: center; color: #333333; text-decoration: none; border-radius: 30px; float: right; display: flex; ">
+                         +  Register New Staff
+                    </a>
+               </div>
+          </div>
+          <br>
+          <input type="hidden" id="page" name="page" value="">
+          <div class="row" style="border-bottom: thin solid black;">
+               <div class="col-3 mx-3" style="height: 100%;">
+                    <button id="investigator" class="selected" style="background-color: transparent; color: black; font-size: 13px;" onclick="toggleTab('Investigator')">Forensic Investigator</button>
+               </div>
+               <div class="col-3 mx-3" style="height: 100%;">
+                    <button id="chemist" class="not-selected" style="background-color: transparent; color: black; font-size: 13px;" onclick="toggleTab('Chemist')">Chemist</button>
+               </div>
+               <div class="col-3 mx-3" style="height: 100%;">
+                    <button id="pathologist" class="not-selected" style="background-color: transparent; color: black; font-size: 13px;" onclick="toggleTab('Pathologist')">Pathologist</button>
+               </div>
+          </div>
+          <br>
+          <div class="row">
+               <table class="table table-striped" id="table">
+                    <thead>
+                         <tr>
+                              <th style="text-align:center">ID</th>
+                              <th style="text-align:center">Name</th>
+                              <th style="text-align:center">Username</th>
+                              <th style="text-align:center">Last Login</th>
+                              <th style="text-align:center">Status</th>
+                              <th style="text-align:center">Action</th>
+                         </tr>
+                    </thead>
+                    {% for key, value in data.items %}
+                         {% for p in value %}
+                              <tbody {% if p.number != 1 or key != 'Investigator' %}hidden{% endif %} id="{{key}}_page_{{p.number}}">
+                                   {% for d in p %}
+                                        <tr>
+                                             <td style="text-align:center">{{d.staff_no}}</td>
+                                             <td style="text-align:left">
+                                                  <span style="background-color: transparent; border-color: transparent; border-radius: 50%; width: 15px; height: 15px; float: left; margin-right: 10px;"><i class="{% if d.gender == "Male"%}bi bi-gender-male{% else %}bi bi-gender-female{% endif %}" style="color: {% if d.gender == "Male"%}blue{% else %}pink{% endif %}"></i></span>
+                                                  {{d.name}}
+                                             </td>
+                                             <td style="text-align:center">{{d.email}}</td>
+                                             <td style="text-align:center">{{d.last_login}}</td>
+                                             <td style="text-align:center"><span class="badge {% if d.is_active %}bg-success{% else %}bg-danger{% endif %}">{% if d.is_active %}Active{% else %}Terminated{% endif %}</span></td>
+                                             <td style="text-align:center">
+                                                  <a href="{% url 'fcmsapp:staff-details' staff_no=d.staff_no %}">
+                                                       <i style="color:black" class="bi bi-eye"></i>
+                                                  </a>
+                                             </td>
+                                        </tr>
+                                   {% endfor %}
+                              </tbody>
+                         {% endfor %}
+                    {% endfor %}
+               </table>
+          </div>
+          {% for key, value in data.items %}
+               <div class="row" id="{{key}}_pageNav" {% if key != 'Investigator' %}hidden{% endif %}>
+                    <div class="col-4"></div>
+                    <div class="col-4 page-nav">
+                         <button type="button" onclick="prevPage('{{key}}')">
+                              &laquo;
+                         </button>
+                         <input type="number" id="{{key}}_pageNum" style="width: 2vw;" value="1" min="1" onchange="specificPage('{{key}}', '{{data.num_pages}}')">
+                         <label> of {{value.num_pages}}</label>
+                         <button type="button" onclick="nextPage('{{key}}', '{{value.num_pages}}')">
+                              &raquo;
+                         </button>
+                    </div>
+               </div>
+          {% endfor %}
+     </div>
+</div>
+<script>
+     function toggleTab(toPage){
+          var page = document.getElementById('page');
+          page.value = toPage;
+          const fi = document.getElementById('investigator');
+          const ch = document.getElementById('chemist');
+          const pa = document.getElementById('pathologist');
+
+          const fip = document.getElementById('Investigator_pageNav')
+          const cip = document.getElementById('Chemist_pageNav')
+          const pip = document.getElementById('Pathologist_pageNav')
+
+          if (page.value == 'Investigator') {
+               fi.classList.add('selected'); // is display the blue line below the button
+               fi.classList.remove('not-selected'); 
+
+               ch.classList.add('not-selected'); // remove the blue line below the button
+               ch.classList.remove('selected');
+
+               pa.classList.add('not-selected'); // remove the blue line below the button
+               pa.classList.remove('selected');
+
+               const table = document.getElementById('table');
+               for (let i = 0; i < table.children.length; i++){
+                    var element = table.children[i];
+                    if (element.id.includes('page_')){ // if element is a page
+                         element.hidden = true;
+                    }
+               }
+               document.getElementById('Investigator_page_1').hidden = false; // show the first page of forensic investigator
+
+               fip.hidden = false; // show the page navigation for forensic investigator
+               cip.hidden = true;
+               pip.hidden = true;
+          } else if (page.value == 'Chemist') {
+               ch.classList.add('selected'); 
+               ch.classList.remove('not-selected'); 
+
+               fi.classList.add('not-selected');
+               fi.classList.remove('selected');
+
+               pa.classList.add('not-selected');
+               pa.classList.remove('selected');
+
+               const table = document.getElementById('table');
+               for (let i = 0; i < table.children.length; i++){
+                    var element = table.children[i];
+                    if (element.id.includes('page_')){
+                         element.hidden = true;
+                    }
+               }
+               document.getElementById('Chemist_page_1').hidden = false;
+
+               fip.hidden = true;
+               cip.hidden = false;
+               pip.hidden = true;
+          } else if (page.value == 'Pathologist') {
+               pa.classList.add('selected');
+               pa.classList.remove('not-selected');
+
+               fi.classList.add('not-selected');
+               fi.classList.remove('selected');
+
+               ch.classList.add('not-selected');
+               ch.classList.remove('selected');
+
+               const table = document.getElementById('table');
+               for (let i = 0; i < table.children.length; i++){
+                    var element = table.children[i];
+                    if (element.id.includes('page_')){
+                         element.hidden = true;
+                    }
+               }
+               document.getElementById('Pathologist_page_1').hidden = false;
+
+               fip.hidden = true;
+               cip.hidden = true;
+               pip.hidden = false;
+          }
+     }
+
+     function prevPage(role){
+          const table = document.getElementById('table');
+          const pageNum = document.getElementById(role+'_pageNum');
+          const elements = table.children;
+          for (let i = 0; i < elements.length; i++){ 
+               var element = elements[i]; 
+               if (element.id.includes('page_')){ // if element is a page
+                    if (!element.hidden){ // if element is show 
+                         var current = parseInt(element.id.split("_")[2]);
+                         var previous;
+                         if (current > 1) {
+                              element.hidden = true;
+                              previous = current - 1;
+                         } else {
+                              element.hidden = false;
+                              previous = 1;
+                         }
+                         break;
+                    }
+               }
+          }
+
+          const prevPage = document.getElementById(role+'_page_'+previous);
+          prevPage.hidden = false;
+          pageNum.value = previous;
+     }
+
+     function nextPage(role, totalPages){
+          const table = document.getElementById('table');
+          const pageNum = document.getElementById(role+'_pageNum');
+
+          const elements = table.children;
+          for (let i = 0; i < elements.length; i++){   
+               var element = elements[i];            
+               if (element.id.includes('page_')){
+                    if (!element.hidden){
+                         var current = parseInt(element.id.split("_")[2]);
+                         var next;
+                         if (current < totalPages) {
+                              element.hidden = true;
+                              next = current + 1;
+                         } else {
+                              element.hidden = false;
+                              next = totalPages;
+                         }
+                         break;
+                    }
+               }
+          }
+
+          const nextPage = document.getElementById(role+'_page_'+next);
+          nextPage.hidden = false;
+          pageNum.value = next;
+     }
+
+     function specificPage(role, totalPages){
+          const table = document.getElementById('table');
+          const pageNum = document.getElementById(role+'_pageNum').value;
+          const toPage = document.getElementById('page_'+pageNum);
+
+          const elements = table.children;
+          for (let i = 0; i < elements.length; i++){   
+               var element = elements[i];            
+               if (element.id.includes('page_')){
+                    if (!element.hidden){
+                         element.hidden = true;
+                         break;
+                    }
+               }
+          }
+
+          if (pageNum < 1) {
+               document.getElementById(role+'_page_1').hidden = false;
+               document.getElementById(role+'_pageNum').value = '1';
+          } else if (pageNum > totalPages) {
+               document.getElementById(role+'_page_'+totalPages).hidden = false;
+               document.getElementById(role+'_pageNum').value = totalPages;
+          } else {
+               toPage.hidden = false;
+          }
+     }
+</script>
+{% endblock %}

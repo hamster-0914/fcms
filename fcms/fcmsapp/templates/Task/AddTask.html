@@ -1,0 +1,155 @@
+{% extends "Index.html" %}
+
+{% block title %}Add Task{% endblock %}
+
+
+{% block content %} 
+ <style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+ </style>
+<br>
+<div class="row" style="height: 90%;">
+     <div class="col-11">
+          <div class="row">
+               <br>
+               <div class="col">
+                    <h1 style="font-weight: bold; font-size: large;">Task<i class="bi bi-caret-right-fill"></i> Add New Task</h1>
+               </div>
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div id="addTaskPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+               <br>
+                    <div class="row mx-1">
+                         <h4>New Task</h4>
+                         <hr style="border-top: thin solid black; opacity: 0.1;">
+                    </div>
+                    <form method="post">
+                         {% csrf_token %}
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Case No</label>
+                                        {% comment %} required to select the task that added in (only for active and in progress status case) {% endcomment %}
+                                        <select id="case_no" name="case_no" class="form-select" style="font-size:12px" required>
+                                             {% if not case_no %}
+                                                  <option selected disabled hidden value="">--- Select Case ---</option>
+                                             {% endif %}
+                                             {% for case in case_list %}
+                                                  <option value="{{case.case_no}}" {% if case_no %}{% if case_no == case.case_no %}selected{% endif %}{% endif %}>Case {{case.case_no}}</option>
+                                             {% endfor %}
+                                        </select>
+                                   </div>
+                                   <br>
+                                   <div class="form-group">
+                                        <label class="label-title">Task Title</label>
+                                        <input type="text" id="title" name="title" class="form-control" placeholder="" max-length="100" required>
+                                   </div>
+                                   <br>
+                                   <div class="form-group">
+                                        <label class="label-title">Status</label>
+                                        <input type="text" id="status" name="status" class="form-control" value"{{status}}" placeholder="{{status}}" disabled>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Created Date</label>
+                                        <input type="text" id="createddate" name="createddate" class="form-control" value="{{created_date}}" placeholder="{{created_date}}" disabled>
+                                   </div>
+                                   <br>
+                                   <div class="form-group">
+                                        <label class="label-title">Priority</label>
+                                        <select class="form-select" id="priority" name="priority" style="font-size:12px" required>
+                                             <option selected disabled hidden value="">--- Select Priority ---</option>
+                                             <option value="High">High</option>
+                                             <option value="Medium">Medium</option>
+                                             <option value="Low">Low</option>
+                                        </select>
+                                   </div>
+                                   <br>
+                                   <div class="form-group">
+                                        <label class="label-title">Due Date</label>
+                                        <input type="date" id="duedate" name="duedate" class="form-control" placeholder="" required>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="form-group">
+                                   <label class="label-title">Description</label>
+                                   <textarea id="description" name="description" class="form-control" rows="4" max-length="5000" required></textarea>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-4"></div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:task-management' %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px; 
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Cancel
+                                   </a>
+                              </div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <button type="submit" class="" type="button" onclick="" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;
+                                   height: 100%;">
+                                   Save
+                                   </button>
+                              </div>
+                         </div>
+                    </form>
+               </div>
+          </div>
+     </div>
+</div>
+<script>
+     document.getElementById("title").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+     document.getElementById("description").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+     document.getElementById('duedate').addEventListener('input',function(){
+          var date = new Date(duedate.value);
+          var dateNow = Date.now();
+          if(date <= dateNow){
+               duedate.setCustomValidity("Due date must be in the future");
+               
+          }else{
+               duedate.setCustomValidity("");
+          }
+     });
+     document.getElementById('case_no').addEventListener('click',function(){
+          if (document.getElementById('case_no').options.length == 1 && document.getElementById('case_no').options[0].value == "") {
+               toastr.error("There is no active or in progress case to add task");
+          }
+     });
+
+</script>
+
+{% endblock %}

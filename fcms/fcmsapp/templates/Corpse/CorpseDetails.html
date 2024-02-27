@@ -1,0 +1,450 @@
+{% extends "Index.html" %}
+
+{% block title %}Corpse Details{% endblock %}
+
+
+{% block content %}
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+     input::-webkit-outer-spin-button,
+     input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+     }
+     .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 24px;
+     }
+     .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+     }
+     .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 34px;
+     }
+     
+     .slider:before {
+          position: absolute;
+          content: "";
+          height: 19px;
+          width: 19px;
+          left: 3px;
+          top: 2px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 50%;
+     }
+     
+     input:checked + .slider {
+          background-color: #2196F3;
+     }
+     
+     input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+     }
+     
+     input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+     }
+</style>  
+<br>
+<div class="row" style="height: 90vh; overflow-y: scroll">
+     <div class="col-12">
+          <div class="row">
+               <div class="col-10">
+                    <h1 style="font-weight: bold; font-size: large;">Corpse Management <i class="bi bi-caret-right-fill"></i>{{corpse.corpse_no}}</h1>
+               </div>
+               {% if corpse.status != "Completed"%}
+               {% if case_status != "Terminated"%}
+               {% if not has_custody %}
+               <div class="col-2">
+                    <div class="row">
+                         <button type="button" class="btn btn-danger" style="font-size: smaller;" data-bs-toggle="modal" data-bs-target="#custodyModal" aria-expanded="false">
+                              Register Custody
+                         </button>
+                    </div>
+               </div>
+               {% endif %}
+               {% endif %}
+               {% endif %}
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div id="caseDetailsPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                    <br>
+                    <form method="post" id="corpseForm">
+                         {% csrf_token %}
+                         <input type="hidden" id="filename" name="filename" value="">
+                         <input type="hidden" id="editMode" name="editMode" value="False">
+                         <div class="row mx-1 ">
+                              <div class="col-6">
+                                   <h4>Corpse Details</h4>
+                              </div>
+                              <div class="col-3">
+                              </div>
+                              {% if corpse.status != "Completed"%}
+                                   {% if case_status != "Terminated"%}
+                                        <div class="col-3 row">
+                                             <div class="col-6">
+                                                  <label style="float: right;">Edit</label>
+                                             </div>
+                                             <div class="col-6">
+                                                  <label class="switch">
+                                                       <input type="checkbox" id="editSwitch" onchange="toggleEdit()" {% if not has_custody %}disabled{%endif%}>
+                                                       <span class="slider" id="slider"></span>
+                                                  </label>
+                                             </div>
+                                        </div>
+                                   {% endif %}
+                              {% endif %}
+                              <hr style="border-top: thin solid black; opacity: 0.1;">
+                         </div>
+                         <div class="row">
+                              <div class="form-group row">
+                                   <label class="col-2 col-form-label">Case No</label>
+                                   <div class="col-5">
+                                        <input type="text" id="case_no" name="case_no" class="form-control" value="{{corpse.case_no}}" disabled >
+                                   </div>
+                                   <div class="col-2">
+                                        {% if case_status == 'New Case' %}
+                                             <span class="badge bg-primary">{{case_status}}</span>
+                                        {% elif case_status == 'In Progress' %}
+                                             <span class="badge bg-warning">{{case_status}}</span>
+                                        {% elif case_status == 'Completed' %}
+                                             <span class="badge bg-success">{{case_status}}</span>
+                                        {% elif case_status == 'Terminated' %}
+                                             <span class="badge bg-danger">{{case_status}}</span>
+                                        {% endif %}
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Corpse No</label>
+                                        <input type="text" id="corpse_no" name="corpse_no" class="form-control" placeholder="" value="{{corpse.corpse_no}}" disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Discovery Location</label>
+                                        <input type="text" id="discovery_location" name="discovery_location" class="form-control" placeholder="" value="{{corpse.discovery_location}}" title="{{corpse.discovery_location}}" required disabled>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Date Discovery</label>
+                                        <input type="date" id="date_of_discovery" name="date_of_discovery" class="form-control" placeholder="" value="{{corpse.date_of_discovery}}" required disabled>
+                                   </div>
+
+                                   <div class="form-group">
+                                        <label class="label-title">Status</label>
+                                        <select class="form-select" style="font-size:12px"  id="status" name="status" disabled>
+                                             <option selected disabled hidden value="{{corpse.status}}">{{corpse.status}}</option>
+                                             <option value="New Corpse" {% if corpse.status == 'New Corpse' %}selected{% endif %}>New Corpse</option>
+                                             <option value="In Progress" {% if corpse.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                             <option value="Completed" {% if corpse.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                        </select>                                   </div>
+                              </div>
+                         </div>
+                         <hr style="border-top: thin solid black; opacity: 0.1;">
+                         <div class="row">
+                              <div class="col-sm-3">
+                                   <div class="form-group">
+                                        <label class="label-title">Name</label>
+                                        <input type="text" id="name" name="name" class="form-control" placeholder="" max-length="100" value="{{corpse.name}}" required disabled>
+                                   </div>
+                              </div>
+                              <div class="col-sm-3">
+                                   <div class="form-group">
+                                        <label class="label-title">Estimate age</label>
+                                        <input type="number" id="estimate_age" name="estimate_age" class="form-control" placeholder="" value="{{corpse.estimate_age}}" required disabled>
+                                   </div>
+                              </div>
+                              <div class="col-sm-3">
+                                   <div class="form-group">
+                                        <label class="label-title">Gender</label>
+                                        <select class="form-select" style="font-size:12px" id="gender" name="gender" required disabled>
+                                             <option selected disabled hidden value="">--- Select Gender ---</option>
+                                             <option value="Male" {% if corpse.gender == "Male" %}selected{%endif%}>Male</option>
+                                             <option value="Female" {% if corpse.gender == "Female" %}selected{%endif%}>Female</option>
+                                             <option value="Unknown" {% if corpse.gender == "Unknown" %}selected{%endif%}>Unknown</option>
+
+                                        </select>
+                                   </div>
+                              </div>
+                              <div class="col-sm-3">
+                                   <div class="form-group">
+                                        <label class="label-title">Last Updated</label>
+                                        <input type="text" id="lastupdatedDisabled" name="lastupdatedDisabled" class="form-control" placeholder="" value="{{last_updated}}"  disabled>
+
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Cause death</label>
+                                        <textarea id="cause_death" name="cause_death"class="form-control" rows="4" max-length="1000" required disabled value="{{corpse.cause_death}}">{{corpse.cause_death}}</textarea>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Condition</label>
+                                        <textarea id="condition" name="condition" class="form-control" rows="4"  max-length="5000" required disabled value="{{corpse.condition}}">{{corpse.condition}}</textarea>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                    </form>
+                    <div class="row">
+                         <div class="form-group">
+                              <label class="label-title">Autopsy Report</label>
+                              {% if corpse.autopsy_report %}
+                              <div class="row">
+                                   <div class="col-2">
+                                        <a href="{{MEDIA_URL}}{{corpse.autopsy_report}}" target="_blank" class="btn btn-primary" style="background-color:#555555;
+                                        color:#ffffff;
+                                        border: none; 
+                                        border-radius: 10px;
+                                        font-size: medium;
+                                        display: block;
+                                        width: 100%;
+                                        height: 100%;">
+                                        View Report
+                                        </a>
+                                   </div>
+                              </div>
+                              {% comment %} <iframe src="{{MEDIA_URL}}{{corpse.autopsy_report}}" type='application/pdf' width="100%" height="600px" style="display: block;"></iframe> {% endcomment %}
+                              {% else %}
+                              <input type='text' id='upload-report-locked' class='form-control' value='Toggle the edit button to upload report' disabled>
+                              <form method="post" enctype="multipart/form-data" class="dropzone needsclick form-control" id="autopsyReport" hidden>
+                                   {% csrf_token %}
+                                   <div class="dz-message needsclick">
+                                        <i class="bi bi-cloud-upload" style="font-size: large;"></i>
+                                        <h6>Drop files here or click to upload.</h6>
+                                   </div>
+                              </form>
+                              {% endif %}
+                         </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                         <div class="col-4"></div>
+                         <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                              <a class="btn btn-danger" href="{% url 'fcmsapp:corpse-management' %}" style="
+                              background-color:#555555;
+                              color:#ffffff;
+                              border: none; 
+                              border-radius: 10px; 
+                              font-size: medium;
+                              display: block;
+                              width: 100%;">
+                              Cancel
+                              </a>
+                         </div>
+                         <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                              <button type="submit" id="submitBtn" class="" type="button" onclick="" style="
+                              background-color:#555555;
+                              color:#ffffff;
+                              border: none; 
+                              border-radius: 10px;
+                              font-size: medium;
+                              display: block;
+                              width: 100%;
+                              height: 100%;">
+                              Save
+                              </button>
+                         </div>
+                    </div>
+                    <br>
+               </div>
+          </div>
+          <br>
+     </div>
+</div> 
+<div class="modal fade" id="custodyModal" tabindex="-1" aria-labelledby="custodyModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div class="modal-header">
+                    <h5 class="modal-title" id="custodyModalLabel">Register Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                    When you click "Register," please be aware that your staff number and relevant details will be securely recorded into a blockchain. This process ensures the unalterable chain of custody for the evidence, enhancing transparency and reliability. The blockchain technology employed guarantees the integrity of the information, providing a tamper-proof record of the registration. By proceeding, you acknowledge and consent to the immutable nature of this registration process, which contributes to maintaining the credibility and security of the data.
+               </div>
+               <div class="modal-footer">
+                    <form method="post" action="{% url 'fcmsapp:register-corpse-custody' corpse_no=corpse.corpse_no staff_no=currentStaff.staff_no %}">
+                         {% csrf_token %}
+                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                         <button type="submit" class="btn btn-danger">Register</button>
+                    </form>
+               </div>
+          </div>
+     </div>
+</div> 
+<script>
+     function toggleEdit(){
+          const status = document.getElementById('status');
+          const name = document.getElementById('name');
+          const estimate_age = document.getElementById('estimate_age');
+          const gender = document.getElementById('gender');
+          const cause_death = document.getElementById('cause_death');
+          const condition = document.getElementById('condition');
+          const editMode = document.getElementById("editMode");
+          const autopsyReport = document.getElementById("autopsyReport");
+          const uploadReportLocked = document.getElementById("upload-report-locked");
+
+          const element = [status,name,estimate_age,gender,cause_death,condition];
+          if(editSwitch.checked == true){
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = false;
+               }
+               autopsyReport.hidden = false;
+               uploadReportLocked.hidden = true;
+               editMode.value = "True";
+          }else{
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = true;
+               }
+               autopsyReport.hidden = true;
+               uploadReportLocked.hidden = false;
+               editMode.value = "False";
+          }
+     }
+
+     function populateHidden(case_no){
+          document.getElementById('terminate_case_no').value = case_no;
+     }
+
+     if (document.getElementById('slider')) {
+          document.getElementById('slider').addEventListener('click', function(){
+               if ('{{has_custody}}' == 'False'){
+                    this.checked = false;
+                    toastr.error('You must register custody before editing corpse details');
+               }
+          }); 
+     }
+
+     document.getElementById('name').addEventListener('input',function(){
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          }else if (/[^A-Za-z0-9 ./]/.test(this.value)) {
+               this.setCustomValidity("Name must not contain special characters other than dots and slashes.");
+          }else if (/[0-9]/.test(this.value)){
+               this.setCustomValidity("Name cannot contain numbers");
+          }else if (/^[.\/]*$/.test(this.value)){
+               this.setCustomValidity("Name cannot contain only dots and slashes");
+          }else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById('estimate_age').addEventListener('input',function(){
+          if (this.value.includes('-')){
+               this.setCustomValidity("Age cannot be negative");
+          }
+          else if(parseInt(this.value) < 1){
+               this.setCustomValidity("Age cannot be 0");
+               
+          }else if(parseInt(this.value) > 120){
+               this.setCustomValidity("Age cannot be more than 120");
+
+          }else if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          }
+          else{
+               this.setCustomValidity("");
+          }
+     });
+
+     document.getElementById('cause_death').addEventListener('input',function(){
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById('condition').addEventListener('input',function(){
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById('submitBtn').addEventListener('click', function(){
+          if (document.getElementById('corpseForm').reportValidity()){
+               document.getElementById('corpseForm').submit();
+          }
+     })
+
+     Dropzone.autoDiscover = false;
+     var evidenceImage = new Dropzone("#autopsyReport", {
+          url: "{% url 'fcmsapp:upload-autopsy-report' %}",
+          method: 'post',
+          paramName: "autopsyReport",
+          maxFilesize: 5,
+          maxFiles: 1,
+          acceptedFiles: ".pdf",
+          addRemoveLinks: true,
+          uploadMultiple: false,
+          parallelUploads: 1,
+          init: function() {
+               this.on("maxfilesexceeded", function(file) {
+                    this.removeAllFiles();
+                    this.addFile(file);
+               });
+               this.on("addedfile", function(file) {
+                    if (this.files.length > 1) {
+                         this.removeFile(this.files[0]);
+                    }
+               });
+               this.on("removedfile", function(file) {
+                    $.ajax({
+                         type: 'POST',
+                         url: "{% url 'fcmsapp:remove-autopsy-report' %}",
+                         data: {
+                              csrfmiddlewaretoken: "{{ csrf_token }}",
+                              filename: file.name
+                         },
+                         success: function(response) {
+                              toastr.success("File removed successfully");
+                         },
+                         error: function(response) {
+                              toastr.error("Error removing file");
+                         }
+                    });
+
+                    if (this.files.length === 0) {
+                         this.emit("reset");
+                    }
+               });
+               this.on('success', function(file, response) {
+                    document.getElementById('filename').value = response.filename;
+               })
+          },
+     });
+</script>
+{% endblock %}

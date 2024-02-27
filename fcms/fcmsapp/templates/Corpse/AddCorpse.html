@@ -1,0 +1,153 @@
+{% extends "Index.html" %}
+
+{% block title %}Add Corpse{% endblock %}
+
+
+{% block content %} 
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+     input::-webkit-outer-spin-button,
+     input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+     }
+</style>
+<br>
+<div class="row" style="height: 90%; overflow-y: scroll">
+     <div class="col-12">
+          <div class="row">
+               <div class="col">
+                    <h1 style="font-weight: bold; font-size: large;">Corpse Management <i class="bi bi-caret-right-fill"></i> Add Corpse</h1>
+               </div>
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div id="caseDetailsPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                    <br>
+                    <form method="post">
+                         {% csrf_token %}
+                         <div class="row mx-1 ">
+                              <h4>New Corpse</h4>
+                              <hr style="border-top: thin solid black; opacity: 0.1;">
+                         </div>
+                         <div class="row">
+                              <div class="form-group row">
+                                   <label class="col-2 col-form-label">Case No</label>
+                                   <div class="col-5">
+                                        <input type="text" id="case_no" name="case_no" class="form-control" value="{{case.case_no}}" disabled >
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Corpse No</label>
+                                        <input type="text" id="corpse_no" name="corpse_no" class="form-control" placeholder="" value="{{next_corpse_no}}" disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Discovery Location</label>
+                                        <input type="text" id="discovery_location" name="discovery_location" class="form-control" placeholder="" max-length="500" required>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Date Discovery</label>
+                                        <input type="date" id="date_of_discovery" name="date_of_discovery" class="form-control" placeholder="" required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Pathologist</label>
+                                        <select class="form-select" style="font-size:12px" name="pathologist_selection" id="pathologist_selection" required>
+                                             <option selected disabled hidden value="">--- Select Pathologist ---</option>
+                                             {% for p in pathologist_selection %}
+                                             <option value="{{p.id}}">{{p.name}}</option>
+                                             {% endfor %}
+                                        </select>
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Created Date</label>
+                                        <input type="text" id="lastupdatedDisabled" name="lastupdatedDisabled" class="form-control" placeholder="" value="{{created_datetime}}" required disabled>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Status</label>
+                                        <input type="text" id="status" name="status" class="form-control" value="{{status}}" placeholder="" disabled>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-4"></div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:case-details' case_no=case.case_no %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Cancel
+                                   </a>
+                              </div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <button type="submit" class="" type="button" onclick="" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;
+                                   height: 100%;">
+                                   Save
+                                   </button>
+                              </div>
+                         </div>
+                         <br>
+                    </form>
+               </div>
+          </div>
+          <br>
+          
+     </div>
+</div> 
+<script>
+     document.getElementById('date_of_discovery').addEventListener('input',function(){
+          var date = new Date(date_of_discovery.value);
+          var dateNow = Date.now();
+          if(date > dateNow){
+               date_of_discovery.setCustomValidity("Discovery date cannot be in the future");
+               
+          }else{
+               date_of_discovery.setCustomValidity("");
+          }
+     });
+
+     document.getElementById("discovery_location").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById('pathologist_selection').addEventListener('click',function(){
+          if (document.getElementById('pathologist_selection').options.length == 1 && document.getElementById('pathologist_selection').options[0].value == "") {
+               toastr.error("There is no pathologist available. Please add pathologist in team.");
+          }
+     });
+     
+     
+</script>
+{% endblock %}

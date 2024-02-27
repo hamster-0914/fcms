@@ -1,0 +1,343 @@
+{% extends "Index.html" %}
+
+{% block title %}Evidence Result{% endblock %}
+
+
+{% block content %}
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+     .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 24px;
+     }
+     .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+     }
+     .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 34px;
+     }
+     
+     .slider:before {
+          position: absolute;
+          content: "";
+          height: 19px;
+          width: 19px;
+          left: 3px;
+          top: 2px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 50%;
+     }
+     
+     input:checked + .slider {
+          background-color: #2196F3;
+     }
+     
+     input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+     }
+     
+     input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+     }
+</style>
+<br>  
+<div class="row" style="height: 70%; overflow-y: scroll">
+     <div class="col-11">
+          <div class="row">
+               <br>
+               <div class="col-10">
+                    <h1 style="font-weight: bold; font-size: large;">Evidence Management <i class="bi bi-caret-right-fill"></i> Add Evidence Analysis Result</h1>
+               </div>
+               {% if evidence.status != "Terminated" %}
+                    {% if analysis_status != "Completed"%}
+                         {% if case_status != "Terminated"%}
+                              {% if not has_custody %}
+                              <div class="col-2">
+                                   <div class="row">
+                                        <button type="button" class="btn btn-danger" style="font-size: smaller;" data-bs-toggle="modal" data-bs-target="#custodyModal" aria-expanded="false">
+                                             Register Custody
+                                        </button>
+                                   </div>
+                              </div>
+                              {% endif %}
+                         {% endif %}
+                    {% endif %}
+               {% endif %}
+          </div>
+          <br>
+          <form method="post">
+               {% csrf_token %}
+               <div class="row" style="height: 90%; width: 100%;">
+                    <div id="caseDetailsPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                         <br>
+                         <div class="row mx-1">
+                              <div class="col-6">
+                                   <h4>Add Evidence Analysis Result</h4>
+                              </div>
+                              <div class="col-3">
+                              </div>
+                              {% if analysis_status != "Completed"%}
+                                   {% if case_status != "Terminated"%}
+                                        {% if evidence.status != "Terminated" %}
+                                        <div class="col-3 row">
+                                             <div class="col-6">
+                                                  <label style="float: right;">Edit</label>
+                                             </div>
+                                             <div class="col-6">
+                                                  <label class="switch">
+                                                       <input type="checkbox" id="editSwitch" onchange="toggleEdit()" {% if not has_custody %}disabled{% endif %}>
+                                                       <span class="slider" id="slider"></span>
+                                                  </label>
+                                             </div>
+                                        </div>
+                                        {% endif %}
+                                   {% endif %}
+                              {% endif %}
+                              <hr style="border-top: thin solid black; opacity: 0.1;">
+                         </div>
+                         <div class="row">
+                              <div class="form-group row">
+                                   <label class="col-3 col-form-label">Case No</label>
+                                   <div class="col-5">
+                                        <input type="text" id="evidenceno" name="evidenceno" class="form-control" value="{{evidence.case_no}}" disabled>
+                                   </div>
+                                   <div class="col-2">
+                                        {% if case_status == 'New Case' %}
+                                             <span class="badge bg-primary">{{case_status}}</span>
+                                        {% elif case_status == 'In Progress' %}
+                                             <span class="badge bg-warning">{{case_status}}</span>
+                                        {% elif case_status == 'Completed' %}
+                                             <span class="badge bg-success">{{case_status}}</span>
+                                        {% elif case_status == 'Terminated' %}
+                                             <span class="badge bg-danger">{{case_status}}</span>
+                                        {% endif %}
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="row">
+                              <div class="form-group row">
+                                   <label class="col-3 col-form-label">Evidence No</label>
+                                   <div class="col-5">
+                                        <input type="text" id="evidenceno" name="evidenceno" class="form-control" value="{{evidence.evidence_no}}" disabled>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Title</label>
+                                        <input type="text" id="title" name="title" class="form-control" placeholder="" value="{{evidence.title}}" maxlength="100" disabled required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Priority to analysis</label>
+                                        <select name="priority" id="priority" class="form-control" disabled>
+                                             <option value="Low" {% if evidence.priority == 'Low' %}selected{% endif %}>Low</option>
+                                             <option value="Medium" {% if evidence.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                                             <option value="High" {% if evidence.priority == 'High' %}selected{% endif %}>High</option>
+                                        </select>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Type of evidence </label>
+                                        <select name="evidence_type" id="evidence_type" class="form-control" disabled required>
+                                             <option selected disabled hidden value="{{evidence.evidence_type}}">{{evidence.evidence_type}}</option>
+                                             <option value="Biological" {% if evidence.evidence_type == 'Biological' %}selected{% endif %}>Biological</option>
+                                             <option value="Trace" {% if evidence.evidence_type == 'Trace' %}selected{% endif %}>Trace</option>
+                                             <option value="Digital" {% if evidence.evidence_type == 'Digital' %}selected{% endif %}>Digital</option>
+                                             <option value="Physical" {% if evidence.evidence_type == 'Physical' %}selected{% endif %}>Physical</option>
+                                             <option value="Testimonial" {% if evidence.evidence_type == 'Testimonial' %}selected{% endif %}>Testimonial</option>
+                                             <option value="Chemical" {% if evidence.evidence_type == 'Chemical' %}selected{% endif %}>Chemical</option>
+                                             <option value="Pattern" {% if evidence.evidence_type == 'Pattern' %}selected{% endif %}>Pattern</option>
+                                        </select>
+                                   </div>         
+                                   <div class="form-group">
+                                        <label class="label-title">Evidence Status</label>
+                                        <input type="text" id="status" name="status" class="form-control" placeholder="" value="{{evidence.status}}" disabled required>
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="row">
+                              <div class="form-group">
+                                   <label class="label-title">Description</label>
+                                   <textarea id="description" name="description" class="form-control" rows="4" value="{{evidence.description}}" disabled>{{evidence.description}}</textarea>
+                              </div>
+                         </div>
+                         <br>
+                         <hr style="border-top: thin solid black; opacity: 0.1;">
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Analysis No</label>
+                                        <input type="text" id="analysis_no" name="analysis_no" class="form-control" placeholder="" {% if analysis.analysis_no == "" %} value="{{next_analysis_no}}" {% else %}  value="{{analysis_no}}" {%endif%}  disabled required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Last Updated</label>
+                                        <input type="text" id="lastupdatedDisabled" name="lastupdatedDisabled" class="form-control" placeholder="" value="{{last_updated}}" disabled required>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Analysis Techniques</label>
+                                        <input type="text" id="analysis_techniques" name="analysis_techniques" class="form-control" placeholder=""  maxlength="200" value="{{analysis_techniques}}"  required  disabled >
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Analysis Status</label>
+                                        <select name="analysis_status" id="analysis_status" class="form-select" style="font-size:12px"  disabled required>
+                                             <option value="In Progress" {%if analysis_status == "In Progress"%}selected{% endif %}>In Progress</option>
+                                             <option value="Completed" {%if analysis_status == "Completed"%}selected{% endif %}>Completed</option>
+                                        </select>
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="row">
+                              <div class="form-group">
+                                   <label class="label-title">Result Summary</label>
+                                   <textarea id="result" name="result" class="form-control" rows="4" max-length="5000" value="{{result}}" disabled required>{{result}}</textarea>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-3"></div>
+                              <input type="hidden" id="lastupdatedDisabled" name="lastupdatedDisabled">
+                              <input type="hidden" id="editMode" name="editMode" value="False">
+                              
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:evidence-management' %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px; 
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Cancel
+                                   </a>
+                              </div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <button type="submit" class="" type="button" onclick="" id="saveBtn" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;
+                                   height: 100%;">
+                                   Save
+                                   </button>
+                              </div>
+                              {% if  analysis_techniques != "" or analysis_status != "" %}
+                              <div class="col-3" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:report' evidence_no=evidence.evidence_no %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px; 
+                                   font-size: Medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Generate Report
+                                   </a>
+                              </div>
+                              {% endif %}
+                         </div>
+                         <br>
+                    </div>
+               </div>
+          </form>
+     </div>
+</div>
+<div class="modal fade" id="custodyModal" tabindex="-1" aria-labelledby="custodyModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div class="modal-header">
+                    <h5 class="modal-title" id="custodyModalLabel">Register Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                    When you click "Register," please be aware that your staff number and relevant details will be securely recorded into a blockchain. This process ensures the unalterable chain of custody for the evidence, enhancing transparency and reliability. The blockchain technology employed guarantees the integrity of the information, providing a tamper-proof record of the registration. By proceeding, you acknowledge and consent to the immutable nature of this registration process, which contributes to maintaining the credibility and security of the data.
+               </div>
+               <div class="modal-footer">
+                    <form method="post" action="{% url 'fcmsapp:register-evidence-custody' evidence_no=evidence.evidence_no staff_no=currentStaff.staff_no %}">
+                         {% csrf_token %}
+                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                         <button type="submit" class="btn btn-danger">Register</button>
+                    </form>
+               </div>
+          </div>
+     </div>
+</div>
+<script>
+     function toggleEdit(){
+          const editSwitch = document.getElementById("editSwitch");
+          const analysis_techniques = document.getElementById("analysis_techniques");
+          const analysis_status = document.getElementById("analysis_status");
+          const result = document.getElementById("result");
+          const editMode = document.getElementById("editMode");
+          
+          const element = [analysis_techniques, analysis_status, result];
+          if(editSwitch.checked == true){
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = false;
+               }
+               editMode.value = "True";
+          }else{
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = true;
+               }
+               editMode.value = "False";
+          }
+     }
+
+     if (document.getElementById('slider')) {
+          document.getElementById('slider').addEventListener('click', function(){
+               if ('{{has_custody}}' == 'False'){
+                    this.checked = false;
+                    toastr.error('You must register custody before editing corpse details');
+               }
+          }); 
+     }
+
+     document.getElementById('saveBtn').addEventListener('click', function() {
+          const analysis_techniques = document.getElementById("analysis_techniques");
+          const result = document.getElementById("result");
+          const editMode = document.getElementById("editMode");
+          const element = [analysis_techniques, result];
+          if(editMode.value == "True"){
+               for(let i=0; i<element.length; i++){
+                    if (element[i].value.trim() == "" || element[i].value.trim() == null || element[i].value.trim() == undefined) {
+                         element[i].setCustomValidity("This field cannot be empty to submit the form");
+                    } else {
+                         element[i].setCustomValidity('');
+                    }
+               }
+          }
+     });
+</script>
+
+{% endblock %}

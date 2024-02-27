@@ -1,0 +1,170 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href={% static "plain_logo.png" %} />
+  <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha512-6S2HWzVFxruDlZxI3sXOZZ4/eJ8AcxkQH1+JjSe/ONCEqR9L4Ysq5JdT5ipqtzU7WHalNwzwBv+iE51gNHJNqQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.css" integrity="sha512-oe8OpYjBaDWPt2VmSFR+qYOdnTjeV9QPLJUeqZyprDEQvQLJ9C5PCFclxwNuvb/GQgQngdCXzKSFltuHD3eCxA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href={% static "dropzone/dropzone.css" %}>
+
+  <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <script src={% static "dropzone/dropzone.js" %}></script>
+
+  <title>{% block title %}{% endblock %}</title>
+  <style>
+    body ::-webkit-scrollbar{
+      width:12px;
+    }
+    body ::-webkit-scrollbar-track{
+      background-color: none;
+    }
+    
+    *{
+      font-family: "Montserrat";
+    }
+    .nav-link:hover {
+      background-color: white;
+      color: black;
+      transition: 0.3s ease;
+      
+    }
+    .nav-link{
+      color: white;
+      font-weight: lighter; 
+      font-size: 1.1vw;
+      border-radius:10px;
+    }
+    .img-full{
+      display: block;
+    }
+    .img-mobile{
+      display: none;
+    }
+    @media (max-width:426px){
+      .img-full{
+        display: none;
+      }
+      .img-mobile{
+        display: block;
+      }
+      .nav-link{
+        font-size: 0;
+        text-align: center;
+      }
+      .nav-link .bi {
+        font-size: 13px;
+      }
+    }
+    
+  </style>
+  
+</head>
+<body>
+  <div style="height: 100vh; overflow: hidden;">
+    <div class="row" style="height: 100%;">
+      <div class="col-3" style="background-color:#333333; border-radius:0px 10px 10px 0px; position: fixed; height: 100%;">
+          <div class="mx-2 my-2">
+            <img id="logo" class="img-full" style="margin-left: auto; margin-right: auto; vertical-align: middle;" width="95%" height="90%" src="{% static 'system_logo.png' %}" alt="Proofinder">
+            <img id="plain_logo" class="img-mobile" style="margin-left: auto; margin-right: auto; vertical-align: middle;" width="95%" height="90%" src="{% static 'plain_logo.png' %}" alt="Proofinder">
+          </div>
+          <div class="position-sticky" style="top: 5%; position: absolute; padding-bottom: 0%;">
+            <ul class="nav flex-column">
+              {% if currentStaff.role == 'Forensic Investigator' or currentStaff.role == 'Chemist' or currentStaff.role == 'Pathologist' %}
+              <li class="nav-item my-2">
+                <a class="nav-link active" href="{% url 'fcmsapp:dashboard' %}" >
+                  <i class="bi bi-house-door mx-2"></i>
+                  Dashboard
+                </a>
+              </li>
+              <li class="nav-item my-2">
+                <a class="nav-link active" href="{% url 'fcmsapp:task-management' %}" >
+                  <i class="bi bi-list-task mx-2"></i>
+                  Task
+                </a>
+              </li>
+              {% endif %}
+              {% if currentStaff.role == 'Forensic Investigator' %}
+              <li class="nav-item my-2">
+                <a id="standard-nav" class="nav-link" href="{% url 'fcmsapp:case-management' %}">
+                  <i class="bi bi-file-earmark-text mx-2"></i>
+                  Case Management
+                </a>
+              </li>
+              {% endif %}
+              {% if currentStaff.role == 'Forensic Investigator' or currentStaff.role == 'Chemist'%}
+              <li class="nav-item my-2">
+                <a class="nav-link" href="{% url 'fcmsapp:evidence-management'%}">
+                  <i class="bi bi-search mx-2"></i>
+                  Evidence Management
+                </a>
+              </li>
+              {% endif %}
+              {% if currentStaff.role == 'Forensic Investigator' or currentStaff.role == 'Pathologist'%}
+              <li class="nav-item my-2">
+                <a class="nav-link" href="{% url 'fcmsapp:corpse-management' %}" >
+                  <i class="bi bi-box-seam mx-2"></i>
+                  Corpse Management
+                </a>
+              </li>
+              {% endif %}
+              {% if currentStaff.role == 'Admin'%}
+              <li class="nav-item my-2">
+                <a class="nav-link" href="{% url 'fcmsapp:staff-management' %}" >
+                  <i class="bi bi-people mx-2"></i>
+                  Staff Management
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+          <div style="justify-content: center; align-items: center; display: flex;">
+            <div class="mb-3 d-flex flex-column" style="bottom: 2px; position: absolute; text-align: center; align-items: center;">
+              <div class="img-div form-control mb-2" style="border-radius:50% !important; width: 50px; height:50px !important; background-color: transparent; display: flex; align-items: center; justify-content: center; font-size: 100%">
+                {% if currentProfilePic %}
+                <img src="{{currentProfilePic}}" alt="Profile Picture" style="width:70px !important; height:50px !important; border-radius:50% !important; object-fit: cover !important;"> 
+                {% else %}
+                <span style="text-align: center"><i class="bi bi-person-fill" style="width: 50px !important; height:50px!important; border-radius:50% !important; color: white;"></i></span>
+                {% endif %}
+              </div>
+              <label style="color:#ffffff; font-size: small; font-weight:bold; text-align:center">
+                <!-- login person name -->
+                {{ currentStaff.staff_no }}
+              </label>
+              <label style="color:#cccccc; font-size: smaller; text-align:center">
+                <!-- login person role -->
+                Role: {{ currentStaff.role }}
+              </label>
+              <br>
+              <a  class="btn btn-danger" href="{% url 'fcmsapp:logout' %}">Logout</a>
+            </div>
+          </div>
+      </div>
+      <div class="col-8 ml-2" style="margin-left: 30%;" >
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>  
+  {% if messages %}
+  {% for message in messages %}
+      {% if message.tags == 'success'%}
+          <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>
+      {% elif message.tags == 'info' %}
+          <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>
+      {% elif message.tags == 'warning' %}
+          <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>
+      {% elif message.tags == 'error' %}
+          <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}')</script>
+      {% endif %}
+  {% endfor %}
+{% endif %}
+</body>

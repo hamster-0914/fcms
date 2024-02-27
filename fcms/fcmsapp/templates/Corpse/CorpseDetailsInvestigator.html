@@ -1,0 +1,299 @@
+{% extends "Index.html" %}
+
+{% block title %}Corpse Details{% endblock %}
+
+
+{% block content %}
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+     input::-webkit-outer-spin-button,
+     input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+     }
+     .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 24px;
+     }
+     .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+     }
+     .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 34px;
+     }
+     
+     .slider:before {
+          position: absolute;
+          content: "";
+          height: 19px;
+          width: 19px;
+          left: 3px;
+          top: 2px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 50%;
+     }
+     
+     input:checked + .slider {
+          background-color: #2196F3;
+     }
+     
+     input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+     }
+     
+     input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+     }
+</style>  
+<br>
+<div class="row" style="height: 90%; overflow-y: scroll">
+     <div class="col-12">
+          <div class="row">
+               <div class="col-10">
+                    <h1 style="font-weight: bold; font-size: large;">Corpse Management <i class="bi bi-caret-right-fill"></i>{{corpse.corpse_no}}</h1>
+               </div>
+               {% if corpse.status != "Completed"%}
+                    {% if case_status != "Terminated"%}
+                         {% if not has_custody %}
+                         <div class="col-2">
+                              <div class="row">
+                                   <button type="button" class="btn btn-danger" style="font-size: smaller;" data-bs-toggle="modal" data-bs-target="#custodyModal" aria-expanded="false">
+                                        Register Custody
+                                   </button>
+                              </div>
+                         </div>
+                         {% endif %}
+                    {% endif %}
+               {% endif %}
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div id="caseDetailsPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                    <br>
+                    <form method="post">
+                         {% csrf_token %}
+                         <div class="row mx-1 ">
+                              <div class="col-6">
+                                   <h4>Corpse Details</h4>
+                              </div>
+                              <div class="col-3">
+                              </div>
+                              {% if corpse.status != "Completed"%}
+                              {% if case_status != "Terminated"%}
+                              <div class="col-3 row">
+                                   <div class="col-6">
+                                        <label style="float: right;">Edit</label>
+                                   </div>
+                                   <div class="col-6">
+                                        <label class="switch">
+                                             <input type="checkbox" id="editSwitch" onchange="toggleEdit()" {% if not has_custody %}disabled{% endif %}>
+                                             <span class="slider" id="slider"></span>
+                                        </label>
+                                   </div>
+                              </div>
+                              {% endif %}
+                              {% endif %}
+                              <hr style="border-top: thin solid black; opacity: 0.1;">
+                         </div>
+                         <div class="row">
+                              <div class="form-group row">
+                                   <label class="col-2 col-form-label">Case No</label>
+                                   <div class="col-5">
+                                        <input type="text" id="case_no" name="case_no" class="form-control" value="{{corpse.case_no}}" disabled >
+                                   </div>
+                                   <div class="col-2">
+                                        {% if case_status == 'New Case' %}
+                                             <span class="badge bg-primary">{{case_status}}</span>
+                                        {% elif case_status == 'In Progress' %}
+                                             <span class="badge bg-warning">{{case_status}}</span>
+                                        {% elif case_status == 'Completed' %}
+                                             <span class="badge bg-success">{{case_status}}</span>
+                                        {% elif case_status == 'Terminated' %}
+                                             <span class="badge bg-danger">{{case_status}}</span>
+                                        {% endif %}
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Corpse No</label>
+                                        <input type="text" id="corpse_no" name="corpse_no" class="form-control" placeholder="" value="{{corpse.corpse_no}}" disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Discovery Location</label>
+                                        <input type="text" id="discovery_location" name="discovery_location" class="form-control" placeholder="" value="{{corpse.discovery_location}}" max-length="500" required disabled>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Date Discovery</label>
+                                        <input type="date" id="date_of_discovery" name="date_of_discovery" class="form-control" placeholder="" value="{{corpse.date_of_discovery}}" required disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Pathologist</label>
+                                        <select class="form-select" style="font-size:12px" name="pathologist_selection" id="pathologist_selection" required disabled>
+                                             <option selected disabled hidden value="{{corpse.name}}">{{corpse.name}}</option>
+                                             {% for p in staff_pathologist %}
+                                             <option value="{{p.id}}"  {% if p.name == corpse.name %}selected{%endif%}>{{p.name}}</option>
+                                             {% endfor %}
+                                        </select>
+                                   </div>
+                              </div>
+                         </div>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Last Updated</label>
+                                        <input type="text" id="lastupdatedDisabled" name="lastupdatedDisabled" class="form-control" placeholder="" value="{{last_updated}}" required disabled>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Status</label>
+                                        <select class="form-select" style="font-size:12px"  id="status" name="status" disabled>
+                                             <option selected disabled hidden value="{{corpse.status}}">{{corpse.status}}</option>
+                                             <option value="New Corpse" {% if corpse.status == 'New Corpse' %}selected{% endif %}>New Corpse</option>
+                                             <option value="In Progress" {% if corpse.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                             <option value="Completed" {% if corpse.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                        </select>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-4"></div>
+                              <input type="hidden" id="editMode" name="editMode" value="False">
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:corpse-management' %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px; 
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Cancel
+                                   </a>
+                              </div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <button type="submit" class="" type="button" onclick="" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;
+                                   height: 100%;">
+                                   Save
+                                   </button>
+                              </div>
+                         </div>
+                         <br>
+                    </form>
+               </div>
+          </div>
+          <br>
+          
+     </div>
+</div>
+<div class="modal fade" id="custodyModal" tabindex="-1" aria-labelledby="custodyModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div class="modal-header">
+                    <h5 class="modal-title" id="custodyModalLabel">Register Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                    When you click "Register," please be aware that your staff number and relevant details will be securely recorded into a blockchain. This process ensures the unalterable chain of custody for the evidence, enhancing transparency and reliability. The blockchain technology employed guarantees the integrity of the information, providing a tamper-proof record of the registration. By proceeding, you acknowledge and consent to the immutable nature of this registration process, which contributes to maintaining the credibility and security of the data.
+               </div>
+               <div class="modal-footer">
+                    <form method="post" action="{% url 'fcmsapp:register-corpse-custody' corpse_no=corpse.corpse_no staff_no=currentStaff.staff_no %}">
+                         {% csrf_token %}
+                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                         <button type="submit" class="btn btn-danger">Register</button>
+                    </form>
+               </div>
+          </div>
+     </div>
+</div> 
+<script>
+     function toggleEdit(){
+          const date_of_discovery = document.getElementById('date_of_discovery');
+          const discovery_location = document.getElementById('discovery_location');
+          const pathologist_selection = document.getElementById('pathologist_selection');
+          const editMode = document.getElementById("editMode");
+
+          const element = [date_of_discovery,discovery_location,pathologist_selection];
+          if(editSwitch.checked == true){
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = false;
+               }
+               editMode.value = "True";
+          }else{
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = true;
+               }
+               editMode.value = "False";
+          }
+     }
+
+     function populateHidden(case_no){
+          document.getElementById('terminate_case_no').value = case_no;
+     }
+
+     if (document.getElementById('slider')) {
+          document.getElementById('slider').addEventListener('click', function(){
+               if ('{{has_custody}}' == 'False'){
+                    this.checked = false;
+                    toastr.error('You must register custody before editing corpse details');
+               }
+          }); 
+     }
+
+     document.getElementById('date_of_discovery').addEventListener('input',function(){
+          var date = new Date(date_of_discovery.value);
+          var dateNow = Date.now();
+          if(date > dateNow){
+               date_of_discovery.setCustomValidity("Discovery date cannot be in the future");
+               
+          }else{
+               date_of_discovery.setCustomValidity("");
+          }
+     });
+
+     document.getElementById("discovery_location").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+</script>
+{% endblock %}

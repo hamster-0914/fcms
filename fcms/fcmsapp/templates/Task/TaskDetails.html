@@ -1,0 +1,251 @@
+{% extends "Index.html" %}
+
+{% block title %}Task Details{% endblock %}
+
+
+{% block content %}  
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+     .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 24px;
+     }
+     .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+     }
+     .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 34px;
+     }
+     
+     .slider:before {
+          position: absolute;
+          content: "";
+          height: 19px;
+          width: 19px;
+          left: 3px;
+          top: 2px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 50%;
+     }
+     
+     input:checked + .slider {
+          background-color: #2196F3;
+     }
+     
+     input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+     }
+     
+     input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+     }
+ </style>
+<br>
+<div class="row" style="height: 90%;">
+     <div class="col-11">
+          <div class="row">
+               <br>
+               <div class="col">
+                    <h1 style="font-weight: bold; font-size: large;">Task <i class="bi bi-caret-right-fill"></i> {{case.case_no}}</h1>
+               </div>
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div id="addTaskPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+               <br>
+               <div class="row mx-1">
+                    <div class="col-6">
+                         <h4>Task Details</h4>
+                    </div>
+                    <div class="col-3"></div>
+                    {% if task.status != 'Overdue'%}
+                         {% if task.status != 'Completed'%}
+                         <div class="col-3 row">
+                              <div class="col-6">
+                                   <label style="float: right;">Edit</label>
+                              </div>
+                              <div class="col-6">
+                                   <label class="switch">
+                                        <input type="checkbox" id="editSwitch" onchange="toggleEdit()">
+                                        <span class="slider"></span>
+                                   </label>
+                              </div>
+                         </div>
+                         {% endif %}
+                    {% endif %}
+               </div>
+               <hr style="border-top: thin solid black; opacity: 0.1;">
+               <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                         <div class="col-sm-6">
+                              <div class="form-group">
+                                   <label class="label-title">Case No</label>
+                                   {% comment %} required to select the task that added in (only for active and in progress status case) {% endcomment %}
+                                   <input type="text" id="caseno" name="caseno" class="form-control" placeholder="" value="{{case.case_no}}" required disabled>
+                              </div>
+                              <br>
+                              <div class="form-group">
+                                   <label class="label-title">Task Title</label>
+                                   {% comment %} Not allow to change {% endcomment %}
+                                   <input type="text" id="title" name="title" class="form-control" placeholder="" value="{{task.title}}" required disabled>
+                              </div>
+                              <br>
+                              <div class="form-group">
+                                   <label class="label-title">Status</label>
+                                   {% if task.status == 'Overdue' %}
+                                   <select class="form-control" id="statusDisabled" name="statusDisabled" style="font-size:12px" required disabled >
+                                        <option value="Overdue" selected>Overdue</option>
+                                   </select>
+                                   {% else %}
+                                   <select class="form-select" id="status" name="status" style="font-size:12px" required disabled>
+                                        <option selected disabled hidden value="{{task.status}}">{{task.status}}</option>
+                                        <option value="New Task"  {% if task.status == 'New Task' %}selected{% endif %}>New Task</option>
+                                        <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                   </select>
+                                   {% endif %}
+                                   
+                              </div>
+                         </div>
+                         <div class="col-sm-6">
+                              <div class="form-group">
+                                   <label class="label-title">Last updated</label>
+                                   <input type="text" id="createddate" name="createddate" class="form-control" value="{{task.updated_datetime}}" disabled>
+                              </div>
+                              <br>
+                              <div class="form-group">
+                                   <label class="label-title">Priority</label>
+                                   <select class="form-select" style="font-size:12px" id="priority" name="priority" required disabled>
+                                        <option value="High"  {% if task.priority == 'High' %}selected{% endif %}>High</option>
+                                        <option value="Medium" {% if task.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                                        <option value="Low" {% if task.priority == 'Low' %}selected{% endif %}>Low</option>
+                                   </select>
+                              </div>
+                              <br>
+                              <div class="form-group">
+                                   <label class="label-title">Due Date</label>
+                                   <input type="date" id="duedate" name="duedate" class="form-control" placeholder="" value="{{task.due_date}}" required disabled>
+                              </div>
+                         </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                         <div class="form-group">
+                              <label class="label-title">Description</label>
+                              <textarea id="description" name="description" class="form-control" rows="4" disabled value={{task.description}}>{{task.description}}</textarea>
+                         </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                         <div class="col-4"></div>
+                         <input type="hidden" id="editMode" name="editMode" value="False">
+                         <input type="hidden" id="statusHidden" name="statusHidden">
+                         <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                              <a class="btn btn-danger" href="{% url 'fcmsapp:task-management' %}" style="
+                              background-color:#555555;
+                              color:#ffffff;
+                              border: none; 
+                              border-radius: 10px; 
+                              font-size: medium;
+                              display: block;
+                              width: 100%;">
+                              Cancel
+                              </a>
+                         </div>
+                         <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                              <button type="submit" class="" type="button" onclick="populateHidden()" style="
+                              background-color:#555555;
+                              color:#ffffff;
+                              border: none; 
+                              border-radius: 10px;
+                              font-size: medium;
+                              display: block;
+                              width: 100%;
+                              height: 100%;">
+                              Save
+                              </button>
+                         </div>
+                         
+                    </div>
+               </form>
+               </div>
+          </div>
+     </div>
+</div>
+<script>
+     function toggleEdit(){
+          const editSwitch = document.getElementById('editSwitch');
+          const title = document.getElementById('title');
+          const status = document.getElementById('status');
+          const priority = document.getElementById('priority');
+          const description = document.getElementById('description');
+
+          const elements = [title, status, priority, description];
+          if (editSwitch.checked == true) {
+               for (let i = 0; i < elements.length; i++) {
+                    elements[i].disabled = false;
+               }
+               editMode.value = "True";
+          } else {
+               for (let i = 0; i < elements.length; i++) {
+                    elements[i].disabled = true;
+               }
+               editMode.value = "False";
+          }
+     }
+
+     function populateHidden(){
+          const statusDisabled = document.getElementById("statusDisabled");
+          const status = document.getElementById("statusHidden");
+          status.value = statusDisabled.value;
+     }
+     document.getElementById("title").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+     document.getElementById("description").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+     document.getElementById('duedate').addEventListener('input',function(){
+          var date = new Date(duedate.value);
+          var dateNow = Date.now();
+          if(date <= dateNow){
+               duedate.setCustomValidity("Due date must be in the future");
+               
+          }else{
+               duedate.setCustomValidity("");
+          }
+     });
+</script>
+{% endblock %}

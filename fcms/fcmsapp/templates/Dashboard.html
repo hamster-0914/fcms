@@ -1,0 +1,177 @@
+{% extends "Index.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+
+{% block content %}
+<style>
+     .table{
+          height: fit-content;
+          border-collapse: separate;
+          border-spacing: 0 15px;
+          font-size: 14px;
+     }
+     .table > thead > tr > th{
+          text-align: center;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td,
+     .table-striped > tbody > tr:nth-child(2n+1) > th{
+          background-color: #87CEEB;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td:first-child{
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td:last-child{
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td{
+          border-top: thin solid lightgray;
+          border-bottom: thin solid lightgray;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td:first-child{
+          border: thin solid lightgray;
+          border-right: none;
+          border-radius: 10px;
+          -moz-border-radius:10px 0 0 10px;
+          -webkit-border-radius:10px 0 0 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td:last-child{
+          border: thin solid lightgray;
+          border-left: none;
+          border-radius: 10px;
+          -moz-border-radius:0 10px 10px 0;
+          -webkit-border-radius:0 10px 10px 0;
+     }
+</style>  
+<body>
+     <br>
+     <div class="row">
+          <div class="col-9">
+               <div class="row">
+                    <div class="col-6">
+                         <h1 style="font-weight: bold; font-size: x-large;">Dashboard</h1>
+                    </div>
+                    <div class="col-5">
+                         <div class="dropdown col-1" style="float:right">
+                              <a class="btn btn-secondary" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                   <i class="bi bi-bell"></i>
+                                   {% if notifications %}
+                                   <span class="position-absolute top-0 start-300 badge rounded-pill badge-notification bg-danger">{{ notifications|length }}</span>
+                                   {% endif %}
+                              </a>
+                              <ul class="dropdown-menu" >
+                                   {% if notifications %}
+                                        {% for n in notifications %}
+                                             <li><a class="dropdown-item" href="{% url 'fcmsapp:add-task' %}?notif_id={{n.id}}"><b>{{n.title}}</b><br>{{n.content}}</a></li>
+                                        {% endfor %}
+                                   {% else %}
+                                        <li><a class="dropdown-item">No Notifications</a></li>
+                                   {% endif %}
+                              </ul>
+                         </div>
+                    </div>
+               </div>
+               <br>
+               <div class="row">
+                    {% for d in dueTask%}
+                    <div class="col-4">
+                         <div class="card">
+                              <div class="card-body">
+                                   <div class="row">
+                                        <b >{{d.case_no}}</b>
+                                   </div>
+                                   <div class="row">
+                                        <p style="font-size:14px">{{d.title}}</p>
+                                   </div>
+                                   <div class="row">
+                                        <p style="font-size:14px"><span class="badge bg-warning">{{d.due_date}}</span></p>
+                                   </div>
+                              </div>
+                         </div>
+                    </div>
+                    {% endfor %}
+               </div>
+               <br>
+               {% comment %} Show all high priority task {% endcomment %}
+               <div class="row">
+                    <div class="row">
+                         <div class="col-4">
+                              <h5>High Priority Task</h5>
+                         </div>
+                         <div class="col-4">
+                         </div>
+                         <div class="col-4">
+                              <a href="{% url 'fcmsapp:add-task' %}" style="border: 1px solid #ffffff ;background-color: #87CEEB ; padding: 5% 10%; font-size: smaller;justify-content: center;align-items: center; color: #333333; text-decoration: none; border-radius: 30px; float: right; ">
+                                   +  New Task
+                              </a>
+                         </div> 
+                    </div>
+                    <div class="col">
+                         <div style="height: 300px; overflow-y: auto;">
+                              <table class="table table-striped table-hover">
+                                   <thead>
+                                        <tr>
+                                             <th style="text-align:center">Task Title</th>
+                                             <th style="text-align:center">Description</th>
+                                             <th style="text-align:center">Due Date</th>
+                                        </tr>
+                                   </thead>
+                                   <tbody>
+                                        {% for h in highPriorityTask %}
+                                        <tr>
+                                             <td style="text-align:left">{{h.title}}</td>
+                                             <td style="text-align:left">{{h.description}}</td>
+                                             <td style="text-align:center">{{h.due_date}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                   </tbody>
+                              </table>
+                         </div>
+                    </div>
+               </div>
+          </div>
+          <div class="col-3" style="border-radius: 10px; max-width: 100%;background-color:#cccccc;">
+               <br>
+               <div class="row">
+                    <div class="col">
+                         <h1 style="font-weight: bold; font-size: medium; text-align:center">Team Collaboration</h1>
+                    </div>
+               </div>
+               <div style="max-width: 100%;background-color:#cccccc; height: 85vh; overflow-y: auto;">
+                    {% for key, value in teammember.items %}
+                         <div class="row my-2 mx-1" style="background-color:#ffffff; border-radius:12px">
+                              <div class="row my-2">
+                                   <b>Case No: {{key}}</b>
+                              </div>
+                              <div class="row">
+                                   <p style="margin: 0;">  Head: </p>
+                              {% for head in value.head %}
+                                   <p style="font-size:12px; font-weight:bold">{{head.name}}</p>
+                              {% endfor %}
+                              </div>
+                              <br>
+                              <div class="row">
+                                   <p style="margin: 0;"> Members</p>
+                              {% for member in value.members %}
+                                   <div class="row">
+                                        {% for mem in member %}
+                                             <div class="col-2 mx-sm-1 mb-1">
+                                                  <img src="{{mem.profile_pic}}" style="width: 30px; height: 30px; border-radius: 50%; margin: 0 5px; border: 1px solid #ffffff;" title="{{mem.name}}">
+                                             </div>
+                                        {% endfor %}
+                                   </div>
+                              {% endfor %}
+                              </div>
+                              
+                         
+                         </div>
+                    {% endfor %}
+               </div>
+          </div>
+     </div>
+     
+     
+</body>
+{% endblock %}

@@ -1,0 +1,333 @@
+{% extends "Index.html" %}
+
+{% block title %}Case Details{% endblock %}
+
+
+{% block content %}  
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+     .save-button{
+          color:#ffffff;
+          background-color: #87ceeb;
+          border: none; 
+          border-radius: 10px;
+          font-size: large;
+          display: block;
+          width: 100%;
+          height: 100%;
+     }
+     .save-button:hover{
+          background-color: #6facc5 ;
+     }
+     .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 24px;
+     }
+     .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+     }
+     .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 34px;
+     }
+     
+     .slider:before {
+          position: absolute;
+          content: "";
+          height: 19px;
+          width: 19px;
+          left: 3px;
+          top: 2px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 50%;
+     }
+     
+     input:checked + .slider {
+          background-color: #2196F3;
+     }
+     
+     input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+     }
+     
+     input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+     }
+     
+</style>
+<br>
+<div class="row" style="height: 90%;">
+     <div class="col-11">
+          <div class="row">
+               <br>
+               <div class="col-6">
+                    <h1 style="font-weight: bold; font-size: large;">Case Management <i class="bi bi-caret-right-fill"></i> Case details</h1>
+               </div>
+               {% if case.status != 'Terminated' %}
+                    {% if case.status != 'Completed' %}
+                         <div class="col-6">
+                              <div class="btn-group dropstart" style="float: right;">
+                                   <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-list"></i>
+                                   </button>
+                                   <ul class="dropdown-menu" style="background-color: #87ceeb; padding: 0%">
+                                        <li><a class="dropdown-item" href="{% url 'fcmsapp:add-corpse'  case_no=case.case_no %}" class="mx-1" style="border-top: none; border-left: none; border-right: none; border-bottom: thin solid black; background-color: #87CEEB ;font-size: smaller; justify-content: center;align-items: center; color: #333333; text-decoration: none; float: right; display: flex; ">
+                                             +  Add Corpse
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{% url 'fcmsapp:add-team' case_no=case.case_no %}" class="mx-1" style="border-top: none; border-left: none; border-right: none; border-bottom: thin solid black; background-color: #87CEEB ;font-size: smaller; justify-content: center;align-items: center; color: #333333; text-decoration: none; float: right; display: flex; ">
+                                             +  Add Team Members
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{% url 'fcmsapp:add-evidence' case_no=case.case_no %}" class="mx-1" style="border-top: none; border-left: none; border-right: none; border-bottom: none; background-color: #87CEEB ;font-size: smaller; justify-content: center;align-items: center; color: #333333; text-decoration: none; float: right; display: flex; ">
+                                             +  Add Evidence
+                                        </a></li>
+                                   </ul>
+                              </div>
+                         </div>
+                    {% endif %}
+               {% endif %}
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div id="caseDetailsPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                    <br>
+                    <div class="row mx-1">
+                         <div class="col-6">
+                              <h3>Case Information</h3>
+                         </div>
+                         <div class="col-3">
+                         </div>
+                         {% if case.status != 'Terminated'%}
+                              {% if case.status != 'Completed' %}
+                                   <div class="col-3 row">
+                                        <div class="col-6">
+                                             <label style="float: right;">Edit</label>
+                                        </div>
+                                        <div class="col-6">
+                                             <label class="switch">
+                                                  <input type="checkbox" id="editSwitch" onchange="toggleEdit()">
+                                                  <span class="slider"></span>
+                                             </label>
+                                        </div>
+                                   </div>
+                              {% endif %}
+                         {% endif %}
+                    </div>
+                    <hr style="border-top: thin solid black; opacity: 0.1;">
+                    <form method="POST">
+                         {% csrf_token %}
+                         <div class="row">
+                              <div class="form-group row">
+                                   <label class="col-2 col-form-label">Case No</label>
+                                   <div class="col-5">
+                                        <input type="text" id="case_no" name="case_no" class="form-control" value="{{case.case_no}}" disabled>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Title</label>
+                                        <input type="text" id="title" name="title" class="form-control" placeholder="" value="{{case.title}}" maxlength="300" required disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Case Type</label>
+                                        <input type="text" id="case_type" name="case_type" class="form-control" placeholder="" value="{{case.case_type}}" maxlength="100" required disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Location</label> 
+                                        <input type="text" id="location" name="location" class="form-control" placeholder="" value="{{case.location}}" maxlength="500" required disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Priority</label>
+                                        <select class="form-select" style="font-size:12px" id="priority" name="priority" required disabled>
+                                             <option value="High" {% if case.priority == 'High' %}selected{% endif %}>High</option>
+                                             <option value="Medium" {% if case.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                                             <option value="Low" {% if case.priority == 'Low' %}selected{% endif %}>Low</option>
+                                        </select>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Status</label>
+                                        {% if case.status == 'Terminated' %}
+                                        <select class="form-select" style="font-size:12px"  id="status" name="status" required disabled>
+                                             <option value="Terminated" selected>Terminate</option>
+                                        </select>
+                                        {% else %}
+                                        <select class="form-select" style="font-size:12px"  id="status" name="status" disabled>
+                                             <option selected disabled hidden value="{{case.status}}">{{case.status}}</option>
+                                             <option value="New Case" {% if case.status == 'New Case' %}selected{% endif %}>New Case</option>
+                                             <option value="In Progress" {% if case.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                             {% if all_evidence_completed and all_corpse_status%}
+                                             <option value="Completed" {% if case.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                             {% endif %}
+                                        </select>
+                                        {% endif %}
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Last Updated</label>
+                                        <input type="text" id="lastupdatedDisabled" name="lastupdatedDisabled" class="form-control" placeholder="" value="{{case.last_updated}}"  disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Description</label>
+                                        <textarea id="description" name="description" class="form-control" rows="4" value="{{case.description}}"  maxlength="5000" disabled>{{case.description}}</textarea>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-3"></div>
+                              <input type="hidden" id="editMode" name="editMode" value="False">
+                              <input type="hidden" id="lastupdatedDisabled" name="lastupdatedDisabled">
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:case-management' %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Cancel
+                                   </a>
+                              </div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <button type="submit" class="" type="button" onclick="" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;
+                                   height: 100%;">
+                                   Save
+                                   </button>
+                              </div>
+                              {% if case.status != 'Terminated'%}
+                                   {% if case.status != 'Completed' %} 
+                                        <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                             <button type="button" onclick="populateHidden('{{case.case_no}}')" data-bs-toggle="modal" data-bs-target="#terminateModal" style="
+                                             background-color:#555555;
+                                             color:#ffffff;
+                                             border: none; 
+                                             border-radius: 10px;
+                                             font-size: medium;
+                                             display: block;
+                                             width: 100%;
+                                             height: 100%;">
+                                             Terminate
+                                             </button>
+                                        </div>
+                                   {% endif %}
+                              {% endif %}
+                              <div class="modal fade" id="terminateModal" tabindex="-1" aria-labelledby="terminateModalLabel" aria-hidden="true">
+                                   <div class="modal-dialog">
+                                        <div class="modal-content">
+                                             <div class="modal-header">
+                                                  <h5 class="modal-title" id="terminateModalLabel">Terminate Confirmation</h5>
+                                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                             </div>
+                                             <div class="modal-body">
+                                                  Are you sure you want to terminate?
+                                             </div>
+                                             <div class="modal-footer">
+                                                  <input type="hidden" id="terminate_case_no" name="terminate_case_no">
+                                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                  <a class="btn btn-secondary" href="{% url "fcmsapp:terminate-case" case_no=case.case_no %}" id="confirmTerminate">Confirm Terminate</a>
+                                             </div>
+                                        </div>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                    </form>
+               </div>
+          </div>
+     </div>
+</div>
+<script>
+     function toggleEdit(){
+          const editSwitch = document.getElementById("editSwitch");
+          const title = document.getElementById("title");
+          const case_type = document.getElementById("case_type");
+          const location = document.getElementById("location");
+          const priority = document.getElementById("priority");
+          const status = document.getElementById("status");
+          const description = document.getElementById("description");
+          const editMode = document.getElementById("editMode");
+
+          const element = [title, case_type, location, priority, status, description];
+          if(editSwitch.checked == true){
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = false;
+               }
+               editMode.value = "True";
+          }else{
+               for(let i=0; i<element.length; i++){
+                    element[i].disabled = true;
+               }
+               editMode.value = "False";
+          }
+     }
+
+     function populateHidden(case_no){
+          document.getElementById('terminate_case_no').value = case_no;
+     }
+
+     document.getElementById("title").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("case_type").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("location").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("description").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+</script>
+{% endblock %}

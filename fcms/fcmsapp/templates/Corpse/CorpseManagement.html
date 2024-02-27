@@ -1,0 +1,243 @@
+{% extends "Index.html" %}
+
+{% block title %}Corpse Management{% endblock %}
+
+
+{% block content %}  
+<style>
+     #search-btn:hover{
+          background-color: #333333;
+     }
+     .form-control:focus{
+          box-shadow: none;
+     }
+     .progress-status{
+          font-size: 13px;
+     }
+     .table{
+          height: fit-content;
+          border-collapse: separate;
+          border-spacing: 0 15px;
+          font-size: 14px;
+     }
+     .table > thead > tr > th{
+          text-align: center;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td,
+     .table-striped > tbody > tr:nth-child(2n+1) > th{
+          background-color: #87CEEB;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td:first-child{
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n+1) > td:last-child{
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td{
+          border-top: thin solid lightgray;
+          border-bottom: thin solid lightgray;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td:first-child{
+          border: thin solid lightgray;
+          border-right: none;
+          border-radius: 10px;
+          -moz-border-radius:10px 0 0 10px;
+          -webkit-border-radius:10px 0 0 10px;
+     }
+     .table-striped > tbody > tr:nth-child(2n) > td:last-child{
+          border: thin solid lightgray;
+          border-left: none;
+          border-radius: 10px;
+          -moz-border-radius:0 10px 10px 0;
+          -webkit-border-radius:0 10px 10px 0;
+     }
+     .page-nav{
+          display: inline-block;
+          text-align: center;
+     }
+     .page-nav button{
+          border: transparent;
+          color: black;
+          background-color: transparent;
+          width: 30px;
+          height: 30px;
+     }
+     .page-nav button:hover{
+          border-radius: 50%;
+          color: black;
+          background-color: #87CEEB;
+     }
+     input::-webkit-outer-spin-button,
+     input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+     }
+
+</style>
+  
+</head>
+<body>
+     <br>
+     <div class="row">
+          <div class="col-11">
+               <div class="row">
+                    <div class="col-5">
+                         <h1 style="font-weight: bold; font-size: x-large;">Corpse Management</h1>
+                    </div>
+               </div>
+               <br>
+               <div class="row">
+                    <div class="col-5">
+                         <form method="post" id="search-form">
+                              {% csrf_token %}
+                              <div class="input-group border rounded-pill" style="border-radius: 5%; border: solid thin black; padding: 1%;">
+                                   <input class="form-control" type="search" style="border: none; border-radius: 20%;" value="{{query}}" id="search-input" name="search-input" placeholder="search by case no">
+                                   <span class="input-group-append">
+                                   <button id="search-btn" class="btn btn-outline-secondary ms-n5" style="border: none; border-radius: 45%;" type="submit">
+                                        <i class="bi bi-search"></i>
+                                   </button>
+                                   </span>
+                              </div>
+                         </form>
+                    </div>
+               </div>
+               <br>
+               <div class="row">
+                    <table class="table table-striped" id="table">
+                         <thead>
+                              <tr>
+                                   <th>Case No</th>
+                                   <th>Corpse No</th>
+                                   <th>Name</th>
+                                   <th>Date Discovery</th>
+                                   <th>Status</th>
+                                   <th>Action</th>
+                              </tr>
+                         </thead>
+                         {% for page in corpse%}
+                         <tbody  id="page_{{page.number}}" {% if page.number != 1 %}hidden{% endif %}>
+                              {%for c in page%}
+                              <tr>
+                                   <td style="text-align:center">{{c.case_no}}</td>
+                                   <td style="text-align:center">{{c.corpse_no}}</td>
+                                   <td style="text-align:left">{{c.name}}</td>
+                                   <td style="text-align:center">{{c.date_of_discovery}}</td>
+                                   <td style="text-align:center">
+                                        {% if c.status == 'New Corpse' %}
+                                             <span class="badge bg-primary">{{c.status}}</span>
+                                        {% elif c.status == 'In Progress' %}
+                                             <span class="badge bg-warning">{{c.status}}</span>
+                                        {% elif c.status == 'Completed' %}
+                                             <span class="badge bg-success">{{c.status}}</span>
+                                        {% endif %}</td>
+                                   <td style="text-align:center">
+                                        <a href="{% if currentStaff.role == "Forensic Investigator" %}{% url 'fcmsapp:corpse-details-investigator' corpse_no=c.corpse_no %}{% elif currentStaff.role == "Pathologist" %}{% url 'fcmsapp:corpse-details' corpse_no=c.corpse_no %}{%endif%}">
+                                             <i style="color:black" class="bi bi-eye"></i> 
+                                        </a>
+                                   </td>
+                              </tr>
+                              {%endfor%}
+                         </tbody>
+                         {%endfor%}
+                    </table>
+               </div>
+               <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4 page-nav">
+                         <button type="button" onclick="prevPage()">
+                              &laquo;
+                         </button>
+                         <input type="number" id="pageNum" style="width: 2vw;" value="1" min="1" onchange="specificPage('{{corpse.num_pages}}')">
+                         <label> of {{corpse.num_pages}}</label>
+                         <button type="button" onclick="nextPage('{{corpse.num_pages}}')">
+                              &raquo;
+                         </button>
+                    </div>
+               </div>
+          </div>
+     </div>
+</body>
+<script>
+     function prevPage(){
+          const table = document.getElementById("table");
+          const pageNum = document.getElementById("pageNum");
+          const elements = table.children;
+          for (let i = 0; i < elements.length; i++){
+               var element = elements[i]; 
+               if (element.id.includes('page_')){ // if element is a page
+                    if (!element.hidden){ // if element is show 
+                         var current = parseInt(element.id.replaceAll("page_", ""));
+                         var previous;
+                         if (current > 1) {
+                              element.hidden = true;
+                              previous = current - 1;
+                         } else {
+                              element.hidden = false;
+                              previous = 1;
+                         }
+                         break;
+                    }
+               }
+          }
+          const prevPage = document.getElementById('page_'+previous);
+          prevPage.hidden = false;
+          pageNum.value = previous;
+     }
+     
+     function nextPage(numPages){
+          
+          const table = document.getElementById("table");
+          const pageNum = document.getElementById("pageNum");
+          const elements = table.children;
+          for (let i = 0; i < elements.length; i++){
+               var element = elements[i]; 
+               if (element.id.includes('page_')){ // if element is a page
+                    if (!element.hidden){ // if element is show 
+                         var current = parseInt(element.id.replaceAll("page_", ""));
+                         var next;
+                         if (current < numPages) { // if current page is not the last page
+                              element.hidden = true; // hide current page
+                              next = current + 1; // set previous page
+                         } else {
+                              element.hidden = false; // show current page
+                              next = numPages;
+                         }
+                         break;
+                    }
+               }
+          }
+     
+          const nextPage = document.getElementById('page_'+next);
+          nextPage.hidden = false;
+          pageNum.value = next;
+     }
+     
+     function specificPage(numPages){
+          const table = document.getElementById('table');
+          const pageNum = document.getElementById('pageNum').value;
+          const toPage = document.getElementById('page_'+pageNum);
+     
+          const elements = table.children;
+               for (let i = 0; i < elements.length; i++){   
+                    var element = elements[i];            
+                    if (element.id.includes('page_')){
+                         if (!element.hidden){
+                              element.hidden = true;
+                              break;
+                         }
+                    }
+               }    
+               if (pageNum < 1) {
+                    document.getElementById('page_1').hidden = false;
+                    document.getElementById('pageNum').value = '1';
+               } else if (pageNum > numPages) {
+                    document.getElementById('page_'+numPages).hidden = false;
+                    document.getElementById('pageNum').value = numPages;
+               } else {
+                    toPage.hidden = false;
+               }
+     }
+</script>
+{% endblock %}

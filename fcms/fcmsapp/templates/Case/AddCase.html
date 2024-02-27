@@ -1,0 +1,150 @@
+{% extends "Index.html" %}
+
+{% block title %}Add Case{% endblock %}
+
+{% block content %}
+<style>
+     .label-title{
+          font-size: 12px;
+     }
+     .form-control{
+          font-size:12px;
+     }
+</style>
+<br>
+<div class="row" style="height: 90%;">
+     <div class="col-12">
+          <div class="row">
+               <br>
+               <div class="col">
+                    <h1 style="font-weight: bold; font-size: large;">Case Management <i class="bi bi-caret-right-fill"></i> Add Case</h1>
+               </div>
+          </div>
+          <br>
+          <div class="row" style="height: 90%; width: 100%;">
+               <div  id="caseDetailsPage" style="border: solid 2px #ffffff;border-radius: 10px;background-color: #CBF0FF;">
+                    <br> 
+                    <div class="row mx-1">
+                         <h4>New Case</h4>
+                         <hr style="border-top: thin solid black; opacity: 0.1;">
+                    </div>
+                    <form method="post">
+                         {% csrf_token %}
+                         <div class="row">
+                              <div class="form-group row">
+                                   <label class="col-2 col-form-label">Case No</label>
+                                   <div class="col-5">
+                                        <input type="text" id="caseno" name="caseno" class="form-control" value="{{next_case_no}}" disabled>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Title</label>
+                                        <input type="text" id="title" name="title" class="form-control" placeholder="" value="" maxlength="300" required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Case Type</label>
+                                        <input type="text" id="case_type" name="case_type" class="form-control" placeholder="" maxlength="100" required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Location</label>
+                                        <input type="text" id="location" name="location" class="form-control" placeholder="" maxlength="500" required>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Priority</label>
+                                        <select class="form-select" id="priority" name="priority" style="font-size:12px" required>
+                                             <option selected disabled hidden value="">--- Select priority ---</option>
+                                             <option value="High">High</option>
+                                             <option value="Medium">Medium</option>
+                                             <option value="Low">Low</option>
+                                        </select>
+                                   </div>
+                              </div>
+                              <div class="col-sm-6">
+                                   <div class="form-group">
+                                        <label class="label-title">Status</label>
+                                        <input type="text" id="status" name="status" class="form-control" value="{{status}}" placeholder="" disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Created Date</label>
+                                        <input type="text" id="created_date" name="created_date" class="form-control" value="{{created_datetime}}" disabled>
+                                   </div>
+                                   <div class="form-group">
+                                        <label class="label-title">Description</label>
+                                        <textarea id="description" name="description" class="form-control" rows="4" maxlength="5000" required></textarea>
+                                   </div>
+                              </div>
+                         </div>
+                         <br>
+                         <div class="row">
+                              <div class="col-4"></div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <a class="btn btn-danger" href="{% url 'fcmsapp:case-management' %}" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px; 
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;">
+                                   Cancel
+                                   </a>
+                              </div>
+                              <div class="col-2" style="justify-content: center; align-items: center; display: flex;">
+                                   <button type="submit" class="" type="button" onclick="" style="
+                                   background-color:#555555;
+                                   color:#ffffff;
+                                   border: none; 
+                                   border-radius: 10px;
+                                   font-size: medium;
+                                   display: block;
+                                   width: 100%;
+                                   height: 100%;">
+                                   Save
+                                   </button>
+                              </div>
+                         </div>
+                         <br>
+                    </form>
+               </div>
+          </div>
+          <br>
+     </div>
+</div>
+<script>
+     document.getElementById("title").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("case_type").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("location").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+
+     document.getElementById("description").addEventListener("input", function() {
+          if (this.value.trim() == "" || this.value.trim() == null || this.value.trim() == undefined) {
+               this.setCustomValidity("This field cannot be empty");
+          } else {
+               this.setCustomValidity('');
+          }
+     });
+</script>
+{% endblock %}
