@@ -1,4 +1,1 @@
-FCMS is my Final Year Project known as Forensic Case Management Systsem. It integrated with a simple base blockchain technology. 
-It developed by using HTML, Css, Javascript, Python (Django) as backend and MYSQL to store dataaset.
-It is designed to assist the forensic pratitioners including forensic investigator, chemist and forensic pathologist in efficiently managing and 
-organizing information related to forensic cases. 
+My final year project is a Forensic Case Management System (FCMS). It is developed using Django and MySQL and is integrated with a simple self made blockchain. The purpose of the system is to assist forensic practitioners such as forensic investigators, chemists and forensic pathologists in efficiently managing and organising information register to forensic cases.
